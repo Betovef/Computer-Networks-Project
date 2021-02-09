@@ -1,0 +1,4 @@
+I planned to implement flooding using channels.
+The nodes will send a message to its neighbors.  
+The program fires a timer and broadcasts addresses. It will check for a reply from a neighbor node and floods again if there is no check. It will flood until the runtime is over. 
+This approach allows every path to be explored and packets to be delivered if there are neighbors. 
