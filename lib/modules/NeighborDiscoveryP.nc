@@ -14,7 +14,7 @@ module NeighborDiscoveryP{
     uses interface SimpleSend as NSender;
     uses interface Receive as NReceiver;
     uses interface Random as RandomTimer;
-    uses interface Hashmap<pack> as NHashmap;
+    uses interface Hashmap<uint16_t> as NHashmap;
 
 }
 implementation{
@@ -44,9 +44,11 @@ implementation{
    }     
 
    void discoverNeighbors(){
-         dbg(NEIGHBOR_CHANNEL, "Searching for neighbors...\n");
+         dbg(NEIGHBOR_CHANNEL, "%d is searching for neighbors...\n", TOS_NODE_ID);
          makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 4, PROTOCOL_PING, 0, "are we neighbors?", PACKET_MAX_PAYLOAD_SIZE);
+         dbg(NEIGHBOR_CHANNEL, "%d is sending packet(broadcasting)...\n", TOS_NODE_ID);
          call NSender.send(sendPackage, AM_BROADCAST_ADDR); //sending package to everyone near node(the one that fired)
+
                                                             //we use protocol ping reply for neighbor discovery
       }
 
@@ -54,35 +56,36 @@ implementation{
       
       if(len == sizeof(pack)){
          pack* myMsg=(pack*) payload;
-         // dbg(NEIGHBOR_CHANNEL, "Node %d found node %d near\n", myMsg->src, TOS_NODE_ID);
+         dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet from node %d\n", TOS_NODE_ID, myMsg->src);
          if(myMsg->TTL != 0){ //need to create function && checkPacketList(myMsg) == FALSE
-            if(myMsg->protocol == PROTOCOL_PING){ 
+            if(myMsg->protocol == PROTOCOL_PING){
+               dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet with protocol ping, sending reply back to node %d\n", TOS_NODE_ID, myMsg->src); 
                makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, myMsg->TTL-1, PROTOCOL_PINGREPLY, 0, "We are neighbors!", PACKET_MAX_PAYLOAD_SIZE);
                call NSender.send(sendPackage, myMsg->src); //sending reply to the node that broadcasted
             }
             else if(myMsg->protocol == PROTOCOL_PINGREPLY){ //if node that broadcasted recieves reply
-               dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with node %d!\n", TOS_NODE_ID, myMsg->src);
-               //add node to the list myMSG->src list.pushback()
+               dbg(NEIGHBOR_CHANNEL, "Node %d recieved reply back from node %d!\n", TOS_NODE_ID, myMsg->src);
+               dbg(NEIGHBOR_CHANNEL, "Packet payload: %s\n", myMsg->payload);
+               call NHashmap.insert(TOS_NODE_ID, myMsg->src);
+               // call NeighborDiscovery.print();
+               //At some point we implement flooding to continue broadcasting to other close nodes
             }
          }
-      // call FSender.send(sendPack, AM_BROADCAST_ADDR); //At some point we implement flooding to continue broadcasting to other close nodes
-      
-      //if protocol is pint reply neighbor discovery
-      //else if protocol is ping glooding
+      // call FSender.send(sendPack, AM_BROADCAST_ADDR); //sender to start flooding
       return msg;
       }
    }   
                                         
    command void NeighborDiscovery.print(){ //TOS_NODE_ID is the node fired
-      //discover neighbor
-      //Print them out
-      //increment ages if youre going to do that
-      // uint16_t i = 0;
+      uint16_t i = 0;
+      uint16_t val = 0;
 
-      // for(i=0; i <NList[i].size(); i++){
-      //    dbg(NEIGHBOR_CHANNEL, "Neighbor discovery module works!\n");
-      // }
-      // return;
+      dbg(GENERAL_CHANNEL, "Printing current Neighbors...\n");
+      for(i=0; i <5; i++){
+         val = call NHashmap.get(i);
+         dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with %d\n", i, val);
+      }
+      return;
    }
 
    void updateNList(uint16_t src){
@@ -97,9 +100,6 @@ implementation{
       //    seqCounter++;
       // }
    }
-
-   // pack* myMsg; //why only works if outside of the function?
-
 
    void makePack(pack* Packet, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t protocol, uint16_t seq, uint8_t* payload, uint8_t length)
    {

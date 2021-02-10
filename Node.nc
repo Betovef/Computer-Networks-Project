@@ -58,14 +58,16 @@ implementation{
    }
 
 
-   event void CommandHandler.ping(uint16_t destination, uint8_t *payload){
-      dbg(GENERAL_CHANNEL, "PING EVENT \n");
+   event void CommandHandler.ping(uint16_t destination, uint8_t *payload){ //runs only once
+
+      dbg(GENERAL_CHANNEL, "PING EVENT \n"); //node x is trying to send to node y (TOS_NODE_ID to destination)
       makePack(&sendPackage, TOS_NODE_ID, destination, 0, 0, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
-      call Sender.send(sendPackage, destination);
+      call Sender.send(sendPackage, destination); //destination needs to be AM_BRODCAST_ADRR (everywhere)
+      
    }
 
    event void CommandHandler.printNeighbors(){
-      dbg(GENERAL_CHANNEL, "Printing Neighbors...");
+      dbg(GENERAL_CHANNEL, "Printing current Neighbors...");
       call NeighborDiscovery.print();
 
    }
