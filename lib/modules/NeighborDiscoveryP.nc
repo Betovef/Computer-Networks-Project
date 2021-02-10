@@ -35,8 +35,8 @@ implementation{
     timer2 = (1000 + (uint16_t)((call RandomTimer.rand16())%2000));
     dbg(NEIGHBOR_CHANNEL, "Timer: %d to %d\n", timer1, timer2); //created a peridoic timer from period t1 to t2
     call PeriodicTimer.startPeriodicAt(timer1, timer2); //the first timer will fire first
-   }                                                     
-
+   }     
+                                                
    command void NeighborDiscovery.print(){ //TOS_NODE_ID is the node fired
       //discover neighbor
       //Print them out
@@ -49,15 +49,18 @@ implementation{
       // return;
    }
 
-   event void PeriodicTimer.fired() //fire meand sending signal in all directions, smaller timer fires first
+   event void PeriodicTimer.fired() //fired means that TOS_NODE_ID is sending signal in all directions, the smaller timer fires first
    {
-     discoverNeighbors();
+      dbg(NEIGHBOR_CHANNEL, "Node %d fires!\n", TOS_NODE_ID);
+      discoverNeighbors();
+
    }
+
    void discoverNeighbors(){
          dbg(NEIGHBOR_CHANNEL, "Searching for neighbors...\n");
-         makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 0, 0, PROTOCOL_PING, "test", PACKET_MAX_PAYLOAD_SIZE);
-         call NSender.send(sendPackage, AM_BROADCAST_ADDR); //when used a sdesitnation AM_Broadcast_adrr send t to everyone it can
-      //In packets we use protocol ping reply for neighbor discovery
+         makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 4, PROTOCOL_PING, 0, "Are you my neighbor?", PACKET_MAX_PAYLOAD_SIZE);
+         call NSender.send(sendPackage, AM_BROADCAST_ADDR); //sending package to everyone near node(the one that fired)
+                                                            //we use protocol ping reply for neighbor discovery
       }
    
    void updateNList(uint16_t src){
@@ -73,12 +76,13 @@ implementation{
       // }
    }
 
-   pack* myMsg; //why only works if outside of the function?
+   // pack* myMsg; //why only works if outside of the function?
 
    event message_t* NReceiver.receive(message_t* msg, void* payload, uint8_t len){ 
-
-      dbg(NEIGHBOR_CHANNEL, "Packet Received\n");
-      myMsg=(pack*) payload;
+      pack* myMsg=(pack*) payload;
+      dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with node %d !\n", myMsg->src, TOS_NODE_ID);
+      // dbg(NEIGHBOR_CHANNEL, "Packet Received: %s\n", payload);
+      // myMsg=(pack*) payload;
       if(myMsg->dest == TOS_NODE_ID){ //if message destiny reaches its final destination
       //add node to the list myMSG->src list.pushback()
       //if protocol is pint reply neighbor discovery//else if protocol is ping glooding
