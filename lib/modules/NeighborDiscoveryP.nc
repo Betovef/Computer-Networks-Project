@@ -21,21 +21,26 @@ module NeighborDiscoveryP{
 implementation{
 
     pack sendPackage;
-    uint32_t timer0;
+    uint16_t timer2;
+    uint16_t timer1;
     uint32_t seqCounter = 0;
 
     // Prototypes
    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
    void updateNeighbors(); //Updates active and inactive neighbors
-   void discoverNeighbors(); // 
+   void discoverNeighbors(); 
 
-   command void NeighborDiscovery.start(){ //command called after node booted
-    timer0 = (uint16_t)((call RandomTimer.rand16())%200); //(1000 + (uint32_t)((call RandomTimer.rand32())%1000));
-    dbg(NEIGHBOR_CHANNEL, "Timer fired: %d \n", timer0);
-    call PeriodicTimer.startPeriodic(timer0);
-   }
+   command void NeighborDiscovery.start(){ //command called when booting
+    timer1 = (1000 + (uint16_t)((call RandomTimer.rand16())%1000)); 
+    timer2 = (1000 + (uint16_t)((call RandomTimer.rand16())%2000));
+    dbg(NEIGHBOR_CHANNEL, "Timer: %d to %d\n", timer1, timer2); //created a peridoic timer from period t1 to t2
+    call PeriodicTimer.startPeriodicAt(timer1, timer2); //the first timer will fire first
+   }                                                     
 
-   command void NeighborDiscovery.print(){
+   command void NeighborDiscovery.print(){ //TOS_NODE_ID is the node fired
+      //discover neighbor
+      //Print them out
+      //increment ages if youre going to do that
       // uint16_t i = 0;
 
       // for(i=0; i <NList[i].size(); i++){
@@ -44,14 +49,15 @@ implementation{
       // return;
    }
 
-   event void PeriodicTimer.fired()
+   event void PeriodicTimer.fired() //fire meand sending signal in all directions, smaller timer fires first
    {
      discoverNeighbors();
    }
    void discoverNeighbors(){
          dbg(NEIGHBOR_CHANNEL, "Searching for neighbors...\n");
          makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 0, 0, PROTOCOL_PING, "test", PACKET_MAX_PAYLOAD_SIZE);
-         call NSender.send(sendPackage, AM_BROADCAST_ADDR);
+         call NSender.send(sendPackage, AM_BROADCAST_ADDR); //when used a sdesitnation AM_Broadcast_adrr send t to everyone it can
+      //In packets we use protocol ping reply for neighbor discovery
       }
    
    void updateNList(uint16_t src){
@@ -70,9 +76,12 @@ implementation{
    pack* myMsg; //why only works if outside of the function?
 
    event message_t* NReceiver.receive(message_t* msg, void* payload, uint8_t len){ 
+
       dbg(NEIGHBOR_CHANNEL, "Packet Received\n");
       myMsg=(pack*) payload;
-      if(myMsg->dest == AM_BROADCAST_ADDR){ //if message destiny reaches its final destination
+      if(myMsg->dest == TOS_NODE_ID){ //if message destiny reaches its final destination
+      //add node to the list myMSG->src list.pushback()
+      //if protocol is pint reply neighbor discovery//else if protocol is ping glooding
          myMsg->dest = myMsg->src;
          myMsg->src = TOS_NODE_ID;
          myMsg->protocol = PROTOCOL_PING;
