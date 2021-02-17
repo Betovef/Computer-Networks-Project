@@ -6,17 +6,17 @@
 
 configuration NeighborDiscoveryC{
     provides interface NeighborDiscovery;
-    // uses interface Hashmap<uint16_t> as NHashmapC;
+    // uses interface Hashmap<uint16_t> as NListC;
 }
 implementation{
     
     components NeighborDiscoveryP;
     NeighborDiscovery = NeighborDiscoveryP.NeighborDiscovery;
 
-    components new HashmapC(uint16_t, 4);
-    NeighborDiscoveryP.NHashmap -> HashmapC;
+    components new ListC(pack, 4);
+    NeighborDiscoveryP.NList -> ListC;
 
-    // NeighborDiscoveryP.NHashmap = NHashmapC;
+    // NeighborDiscoveryP.NList = NListC;
 
     components new TimerMilliC() as PeriodicTimer;
     NeighborDiscoveryP.PeriodicTimer -> PeriodicTimer; // Timer to send neighbor dircovery packets periodically
