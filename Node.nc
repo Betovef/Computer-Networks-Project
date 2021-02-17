@@ -67,7 +67,6 @@ implementation{
    }
 
    event void CommandHandler.printNeighbors(){
-      dbg(GENERAL_CHANNEL, "Printing current Neighbors...");
       call NeighborDiscovery.print();
 
    }

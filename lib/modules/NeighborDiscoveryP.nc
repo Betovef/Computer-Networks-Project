@@ -14,7 +14,7 @@ module NeighborDiscoveryP{
     uses interface SimpleSend as NSender;
     uses interface Receive as NReceiver;
     uses interface Random as RandomTimer;
-    uses interface Hashmap<uint16_t> as NHashmap;
+    uses interface List<pack> as NList;
 
 }
 implementation{
@@ -22,7 +22,7 @@ implementation{
     pack sendPackage;
     uint16_t timer2;
     uint16_t timer1;
-    uint32_t seqNumber = 0;
+    uint32_t seqNumber;
 
     // Prototypes
    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
@@ -45,7 +45,7 @@ implementation{
 
    void discoverNeighbors(){
          dbg(NEIGHBOR_CHANNEL, "%d is searching for neighbors...\n", TOS_NODE_ID);
-         makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 4, PROTOCOL_PING, 0, "are we neighbors?", PACKET_MAX_PAYLOAD_SIZE);
+         makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 4, PROTOCOL_PING, seqNumber+1, "are we neighbors?", PACKET_MAX_PAYLOAD_SIZE);
          dbg(NEIGHBOR_CHANNEL, "%d is sending packet(broadcasting)...\n", TOS_NODE_ID);
          call NSender.send(sendPackage, AM_BROADCAST_ADDR); //sending package to everyone near node(the one that fired)
 
@@ -56,17 +56,19 @@ implementation{
       
       if(len == sizeof(pack)){
          pack* myMsg=(pack*) payload;
+         dbg(NEIGHBOR_CHANNEL, "Sequence number: %d\n", myMsg->seq);
          dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet from node %d\n", TOS_NODE_ID, myMsg->src);
          if(myMsg->TTL != 0){ //need to create function && checkPacketList(myMsg) == FALSE
             if(myMsg->protocol == PROTOCOL_PING){
                dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet with protocol ping, sending reply back to node %d\n", TOS_NODE_ID, myMsg->src); 
-               makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, myMsg->TTL-1, PROTOCOL_PINGREPLY, 0, "We are neighbors!", PACKET_MAX_PAYLOAD_SIZE);
+               makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, myMsg->TTL-1, PROTOCOL_PINGREPLY, seqNumber, "We are neighbors!", PACKET_MAX_PAYLOAD_SIZE);
                call NSender.send(sendPackage, myMsg->src); //sending reply to the node that broadcasted
             }
             else if(myMsg->protocol == PROTOCOL_PINGREPLY){ //if node that broadcasted recieves reply
                dbg(NEIGHBOR_CHANNEL, "Node %d recieved reply back from node %d!\n", TOS_NODE_ID, myMsg->src);
                dbg(NEIGHBOR_CHANNEL, "Packet payload: %s\n", myMsg->payload);
-               call NHashmap.insert(TOS_NODE_ID, myMsg->src);
+               myMsg->dest = TOS_NODE_ID;
+               call NList.pushback(*myMsg);
                // call NeighborDiscovery.print();
                //At some point we implement flooding to continue broadcasting to other close nodes
             }
@@ -78,12 +80,16 @@ implementation{
                                         
    command void NeighborDiscovery.print(){ //TOS_NODE_ID is the node fired
       uint16_t i = 0;
-      uint16_t val = 0;
+      uint16_t listSize = call NList.size();
+      pack neighbor; 
 
-      dbg(GENERAL_CHANNEL, "Printing current Neighbors...\n");
-      for(i=0; i <5; i++){
-         val = call NHashmap.get(i);
-         dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with %d\n", i, val);
+      dbg(GENERAL_CHANNEL, "Printing neighbors of %d: \n", TOS_NODE_ID);
+
+      for(i=0; i < listSize; i++){
+         neighbor = call NList.get(i);
+         if(TOS_NODE_ID == neighbor.dest){
+         dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with %d with sequence number: %d \n", TOS_NODE_ID, neighbor.src, neighbor.seq);
+         }
       }
       return;
    }
