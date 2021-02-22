@@ -21,6 +21,10 @@ implementation {
     components NeighborDiscoveryC; 
     Node.NeighborDiscovery -> NeighborDiscoveryC;
 
+    components FloodingC;
+    Node.FSender -> FloodingC.FSender;
+    // Node.FSender -> FloodingC.FSender;
+
     Node -> MainC.Boot;
 
     Node.Receive -> GeneralReceive;

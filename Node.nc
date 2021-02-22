@@ -21,6 +21,7 @@ module Node{
    uses interface SimpleSend as Sender;
    uses interface CommandHandler;
    uses interface NeighborDiscovery; //Added
+   uses interface SimpleSend as FSender;
 }
 
 implementation{
@@ -50,8 +51,16 @@ implementation{
       dbg(GENERAL_CHANNEL, "Packet Received\n");
       if(len==sizeof(pack)){
          pack* myMsg=(pack*) payload;
-         dbg(GENERAL_CHANNEL, "Package Payload: %s\n", myMsg->payload);
-         return msg;
+         if(TOS_NODE_ID == myMsg->dest){
+            dbg(GENERAL_CHANNEL, "Package Payload: %s\n", myMsg->payload);
+            return msg;
+         }
+         // dbg(GENERAL_CHANNEL, "Node: %d Src: %d Destination: %d: \n", TOS_NODE_ID, myMsg->src, myMsg->dest);
+         else{
+            dbg(GENERAL_CHANNEL, "Ping protocol failed: starting flooding...\n");
+            call FSender.send(sendPackage, AM_BROADCAST_ADDR);
+            return msg;
+         }
       }
       dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
       return msg;
@@ -62,7 +71,8 @@ implementation{
 
       dbg(GENERAL_CHANNEL, "PING EVENT \n"); //node x is trying to send to node y (TOS_NODE_ID to destination)
       makePack(&sendPackage, TOS_NODE_ID, destination, 0, 0, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
-      call Sender.send(sendPackage, destination); //destination needs to be AM_BRODCAST_ADRR (everywhere)
+      call Sender.send(sendPackage, AM_BROADCAST_ADDR); //destination needs to be AM_BROADCAST_ADDR (everywhere) Note- note sure if we still need this after implementing flooding
+      // call FSender.send(sendPackage, destination); //Starting flooding when protocol ping is called
       
    }
 
