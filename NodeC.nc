@@ -11,15 +11,18 @@
 #include "includes/CommandMsg.h"
 #include "includes/packet.h"
 
+#define NEIGHBORHOOD_SIZE 4
+
 configuration NodeC{
 }
 implementation {
     components MainC;
     components Node;
     components new AMReceiverC(AM_PACK) as GeneralReceive;
-
+    
     components NeighborDiscoveryC; 
     Node.NeighborDiscovery -> NeighborDiscoveryC;
+
 
     components FloodingC;
     Node.FSender -> FloodingC.FSender;

@@ -1,30 +1,24 @@
 #define AM_FLOOD 13
-#include "../../includes/channels.h"
 
 configuration FloodingC{
-    provides interface Flooding;
+    provides interface SimpleSend as FSender;
 }
 implementation{
-    //how to call interfaces
-    //Fire timer
-    //Broadcast address
-    //check for reply
-    //if yes, go to next neighbor, otherwise flood again
-    components FloodingP;
-    Flooding = FloodingP.Flooding;
 
-    components new ListC(pack, 4);
-    FloodingP.NList -> ListC;
+    components FloodingP;
+    // Flooding = FloodingP.Flooding;
+    
+    components NeighborDiscoveryC;
+    FloodingP.NeighborDiscovery -> NeighborDiscoveryC;
+
+    // components new ListC(pack, 4);
+    // FloodingP.NList -> ListC;
 
     components new AMReceiverC(AM_FLOOD);
-    FloodingP.FReceiver -> AMReceiverC;
+    // FloodingP.FReceiver -> AMReceiverC;
+    FloodingP.InternalReceiver -> AMReceiverC;
 
     components new SimpleSendC(AM_FLOOD); 
-    FloodingP.FSender -> SimpleSendC;
-
-    components new TimerMilliC() as PeriodicTimer;
-    FloodingP.PeriodicTimer -> PeriodicTimer;
-
-    components RandomC as RandomTimer;
-    FloodingP.RandomTimer -> RandomTimer;   
+    FSender = FloodingP.FSender;
+    FloodingP.InternalSender -> SimpleSendC;
 }

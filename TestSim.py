@@ -144,8 +144,8 @@ def main():
     # s.neighborDMP(1);
     s.ping(1, 2, "Hello, World");
     s.runTime(20);
-    s.neighborDMP(2);
-    # s.ping(1, 3, "Hi!");
+    # s.neighborDMP(2);
+    s.ping(1, 4, "Hi!");
     s.runTime(20);
     s.neighborDMP(3);
     s.runTime(20);

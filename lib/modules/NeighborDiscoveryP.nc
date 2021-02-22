@@ -23,7 +23,7 @@ implementation{
     pack sendPackage;
     uint16_t timer2;
     uint16_t timer1;
-    uint32_t seqNumber;
+    uint32_t seqNum = 0;
 
     // Prototypes
    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
@@ -34,7 +34,7 @@ implementation{
 
    command void NeighborDiscovery.start(){ //command called when booting
     timer1 = (1000 + (uint16_t)((call RandomTimer.rand16())%1000)); 
-    timer2 = (1000 + (uint16_t)((call RandomTimer.rand16())%2000));
+    timer2 = (2000 + (uint16_t)((call RandomTimer.rand16())%2000));
     dbg(NEIGHBOR_CHANNEL, "Timer: %d to %d\n", timer1, timer2); //created a peridoic timer from period t1 to t2
     call PeriodicTimer.startPeriodicAt(timer1, timer2); //the first timer will fire first
    } 
@@ -46,8 +46,9 @@ implementation{
    }     
 
    void discoverNeighbors(){
+         seqNum++;
          dbg(NEIGHBOR_CHANNEL, "%d is searching for neighbors: sending packet(broadcasting)...\n", TOS_NODE_ID);
-         makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 4, PROTOCOL_PING, seqNumber+1, "are we neighbors?", PACKET_MAX_PAYLOAD_SIZE);
+         makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 4, PROTOCOL_PING, seqNum, "are we neighbors?", PACKET_MAX_PAYLOAD_SIZE);
          call NSender.send(sendPackage, AM_BROADCAST_ADDR); //sending package to everyone near node(the one that fired)
                                                             //we use protocol ping reply for neighbor discovery
       }
@@ -61,10 +62,10 @@ implementation{
          uint16_t newNeighbor;
          bool inList = FALSE;
          // dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet from node %d\n", TOS_NODE_ID, myMsg->src);
-         // if(checkPackets(myMsg, TOS_NODE_ID) == FALSE){  //&& myMsg->TTL != 0
+         if( myMsg->TTL != 0){  //&&checkPackets(myMsg, TOS_NODE_ID) == FALSE
             if(myMsg->protocol == PROTOCOL_PING){
                dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet with protocol Ping, sending reply back to node %d\n", TOS_NODE_ID, myMsg->src); 
-               makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, myMsg->TTL-1, PROTOCOL_PINGREPLY, seqNumber, "We are neighbors!", PACKET_MAX_PAYLOAD_SIZE);
+               makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, myMsg->TTL-1, PROTOCOL_PINGREPLY, seqNum, "We are neighbors!", PACKET_MAX_PAYLOAD_SIZE);
                call NSender.send(sendPackage, myMsg->src); //sending reply to the node that broadcasted
                return msg;
             }
@@ -76,17 +77,19 @@ implementation{
                for(i = 0; i< listSize; i++){
                   newNeighbor = call NeighborList.get(i);
                   if(myMsg->src == newNeighbor){
+                     dbg(NEIGHBOR_CHANNEL, "Neighbor is already in list!\n");
                      inList = TRUE;
                   }
                }
 
                if(inList == FALSE){
+               dbg(NEIGHBOR_CHANNEL, "Adding node %d to neighbor list...\n", myMsg->src);   
                call NeighborList.pushback(myMsg->src);
                }
                return msg;
                //At some point we implement flooding to continue broadcasting to other close nodes
             }  
-         // }
+         }
       dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
       return msg;
       }
@@ -125,7 +128,7 @@ implementation{
       }
 
       if(inPacketList == FALSE){
-         makePack(&sendPackage, TOS_NODE_ID, myMsg->src, myMsg->TTL-1, PROTOCOL_PINGREPLY, seqNumber, "We are neighbors!", PACKET_MAX_PAYLOAD_SIZE);
+         makePack(&sendPackage, TOS_NODE_ID, myMsg->src, myMsg->TTL-1, PROTOCOL_PINGREPLY, seqNum, "We are neighbors!", PACKET_MAX_PAYLOAD_SIZE);
          addPacket(sendPackage);
       }
       return;
