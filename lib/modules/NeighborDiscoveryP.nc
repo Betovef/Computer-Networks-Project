@@ -84,12 +84,16 @@ implementation{
       pack neighbor; 
 
       dbg(GENERAL_CHANNEL, "Printing neighbors of %d: \n", TOS_NODE_ID);
-
+      if (listSize == 0){
+         dbg(NEIGHBOR_CHANNEL, "No neighbors \n", TOS_NODE_ID)
+      }
+      else{
       for(i=0; i < listSize; i++){
          neighbor = call NList.get(i);
          if(TOS_NODE_ID == neighbor.dest){
          dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with %d with sequence number: %d \n", TOS_NODE_ID, neighbor.src, neighbor.seq);
          }
+      }
       }
       return;
    }

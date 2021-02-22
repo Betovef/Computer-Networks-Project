@@ -10,8 +10,12 @@ have a node table for implementing a cache (contains largest sequence number see
 */
 module FloodingP{
     Provides interface Flooding;
-    uses interface SimpleSend as FSender;
-    uses interface Receive as FReceiver;
+    
+    uses interface SimpleSend as NSender;
+    uses interface Receive as NReceiver;
+    uses interface Random as RandomTimer;
+    uses interface List<pack> as NList;
+    uses interface Timer<TMilli> as PeriodicTimer;
 }
 implementation{
     uint16_t src;
