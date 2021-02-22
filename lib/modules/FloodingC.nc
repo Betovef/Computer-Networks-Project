@@ -13,10 +13,18 @@ implementation{
     components FloodingP;
     Flooding = FloodingP.Flooding;
 
+    components new ListC(pack, 4);
+    FloodingP.NList -> ListC;
+
     components new AMReceiverC(AM_FLOOD);
     FloodingP.FReceiver -> AMReceiverC;
 
     components new SimpleSendC(AM_FLOOD); 
     FloodingP.FSender -> SimpleSendC;
-    
+
+    components new TimerMilliC() as PeriodicTimer;
+    FloodingP.PeriodicTimer -> PeriodicTimer;
+
+    components RandomC as RandomTimer;
+    FloodingP.RandomTimer -> RandomTimer;   
 }
