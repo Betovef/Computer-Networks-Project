@@ -137,15 +137,12 @@ implementation{
       uint16_t neighbor; 
 
       dbg(GENERAL_CHANNEL, "Printing neighbors of %d: \n", TOS_NODE_ID);
-<<<<<<< HEAD
       // dbg(GENERAL_CHANNEL, "List size: %d \n", listSize);
 
-=======
       if (listSize == 0){
          dbg(NEIGHBOR_CHANNEL, "No neighbors \n", TOS_NODE_ID)
       }
       else{
->>>>>>> 3112f38e121a28b7d832a36cd0a63b4cb3f7fbe0
       for(i=0; i < listSize; i++){
          neighbor = call NeighborList.get(i);
          dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with %d\n", TOS_NODE_ID, neighbor);
