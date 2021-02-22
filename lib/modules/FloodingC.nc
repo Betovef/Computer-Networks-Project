@@ -1,3 +1,4 @@
+
 #define AM_FLOOD 13
 
 configuration FloodingC{
