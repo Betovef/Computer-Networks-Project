@@ -140,13 +140,13 @@ implementation{
       // dbg(GENERAL_CHANNEL, "List size: %d \n", listSize);
 
       if (listSize == 0){
-         dbg(NEIGHBOR_CHANNEL, "No neighbors \n", TOS_NODE_ID)
+         dbg(NEIGHBOR_CHANNEL, "No neighbors \n");
       }
       else{
-      for(i=0; i < listSize; i++){
-         neighbor = call NeighborList.get(i);
-         dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with %d\n", TOS_NODE_ID, neighbor);
-      }
+         for(i=0; i < listSize; i++){
+            neighbor = call NeighborList.get(i);
+            dbg(NEIGHBOR_CHANNEL, "Node %d is neighbor with %d\n", TOS_NODE_ID, neighbor);
+         }
       }
       return;
    }
