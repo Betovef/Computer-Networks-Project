@@ -18,13 +18,17 @@ module FloodingP{
     uses interface Timer<TMilli> as PeriodicTimer;
 }
 implementation{
+    pack sendPackage;
     uint16_t src;
     uint16_t TTL = 10;
     uint16_t seqNum= 0;
+    uint16_t timer2;
+    uint16_t timer1;
     //how to call interfaces
     //Fire timer
     //Broadcast address
     //check for reply
+    bool checkReply();
     //if yes, go to next neighbor, otherwise flood again
 
     // command FReceiver.receive(message_t* msg, void* payload, uint8_t len){
