@@ -1,0 +1,5 @@
+1 What are the pros and cons of using distance vector routing compared to link state routing?
+2 Does your routing algorithm produce symmetric routes (that follow the same path from X to Y in reverse when going from Y to X)? Why or why not?
+3 What if a node advertised itself as having a route to some nodes, but never forwards packets to those nodes? Is there anything you can do in your implementation to deal with this case?
+4 What happens if a distance vector packet is lost or corrupted?
+5 What would happen if a node alternated between advertising and withdrawing a route to a node every few milliseconds? How might you modify your implementation to deal with thiscase?

@@ -34,7 +34,15 @@ implementation{
 
     // Print Routing Table function
     command void RoutingTable.print(){
+    /*
+    Outputs:
+    DEBUG(1): Routing Packet -src: 3, dest: 10, seq: 0, next hop: 2, cost: 26
+    DEBUG (3): Routing Table:
+    DEBUG (3): Dest  Hop  Count
+    DEBUG (3): 6  6  1
+    */
 
     }
 
 }
+
