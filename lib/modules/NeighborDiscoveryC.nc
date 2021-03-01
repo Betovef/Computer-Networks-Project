@@ -1,5 +1,5 @@
-#define AM_NEIGH 14
-#define NEIGHBORHOOD_SIZE 4
+#define AM_NEIGH 60
+#define NEIGHBORHOOD_SIZE 20
 
 configuration NeighborDiscoveryC{
     provides interface NeighborDiscovery;

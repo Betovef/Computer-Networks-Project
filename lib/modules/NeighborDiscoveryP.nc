@@ -41,13 +41,13 @@ implementation{
 
    event void PeriodicTimer.fired() //fired means that TOS_NODE_ID is sending signal in all directions, the smaller timer fires first
    {
-      dbg(NEIGHBOR_CHANNEL, "Node %d fires!\n", TOS_NODE_ID);
+      // dbg(NEIGHBOR_CHANNEL, "Node %d fires!\n", TOS_NODE_ID);
       discoverNeighbors();
    }     
 
    void discoverNeighbors(){
          seqNum++;
-         dbg(NEIGHBOR_CHANNEL, "%d is searching for neighbors: sending packet(broadcasting)...\n", TOS_NODE_ID);
+         // dbg(NEIGHBOR_CHANNEL, "%d is searching for neighbors: sending packet(broadcasting)...\n", TOS_NODE_ID);
          makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 4, PROTOCOL_PING, seqNum, "are we neighbors?", PACKET_MAX_PAYLOAD_SIZE);
          call NSender.send(sendPackage, AM_BROADCAST_ADDR); //sending package to everyone near node(the one that fired)
                                                             //we use protocol ping reply for neighbor discovery
@@ -64,26 +64,26 @@ implementation{
          // dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet from node %d\n", TOS_NODE_ID, myMsg->src);
          if( myMsg->TTL != 0){  //&&checkPackets(myMsg, TOS_NODE_ID) == FALSE
             if(myMsg->protocol == PROTOCOL_PING){
-               dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet with protocol Ping, sending reply back to node %d\n", TOS_NODE_ID, myMsg->src); 
+               // dbg(NEIGHBOR_CHANNEL, "Node %d recieved packet with protocol Ping, sending reply back to node %d\n", TOS_NODE_ID, myMsg->src); 
                makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, myMsg->TTL-1, PROTOCOL_PINGREPLY, seqNum, "We are neighbors!", PACKET_MAX_PAYLOAD_SIZE);
                call NSender.send(sendPackage, myMsg->src); //sending reply to the node that broadcasted
                return msg;
             }
             else if(myMsg->protocol == PROTOCOL_PINGREPLY){ //if node that broadcasted recieves reply
-               dbg(NEIGHBOR_CHANNEL, "Node %d recieved reply back from node %d!\n", TOS_NODE_ID, myMsg->src);
-               dbg(NEIGHBOR_CHANNEL, "Packet payload: %s\n", myMsg->payload);
+               // dbg(NEIGHBOR_CHANNEL, "Node %d recieved reply back from node %d!\n", TOS_NODE_ID, myMsg->src);
+               // dbg(NEIGHBOR_CHANNEL, "Packet payload: %s\n", myMsg->payload);
                
                listSize = call NeighborList.size();
                for(i = 0; i< listSize; i++){
                   newNeighbor = call NeighborList.get(i);
                   if(myMsg->src == newNeighbor){
-                     dbg(NEIGHBOR_CHANNEL, "Neighbor is already in list!\n");
+                     // dbg(NEIGHBOR_CHANNEL, "Neighbor is already in list!\n");
                      inList = TRUE;
                   }
                }
 
                if(inList == FALSE){
-               dbg(NEIGHBOR_CHANNEL, "Adding node %d to neighbor list...\n", myMsg->src);   
+               // dbg(NEIGHBOR_CHANNEL, "Adding node %d to neighbor list...\n", myMsg->src);   
                call NeighborList.pushback(myMsg->src);
                }
                return msg;

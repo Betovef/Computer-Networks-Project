@@ -1,5 +1,5 @@
 
-#define AM_FLOOD 13
+#define AM_FLOOD 18
 
 configuration FloodingC{
     provides interface SimpleSend as FSender;
@@ -14,6 +14,9 @@ implementation{
 
     // components new ListC(pack, 4);
     // FloodingP.NList -> ListC;
+
+    components new ListC(pack, 20) as PacketListC;
+    FloodingP.PacketList-> PacketListC;
 
     components new AMReceiverC(AM_FLOOD);
     // FloodingP.FReceiver -> AMReceiverC;

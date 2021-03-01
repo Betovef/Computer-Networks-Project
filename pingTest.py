@@ -8,7 +8,7 @@ def main():
     s.runTime(1);
 
     # Load the the layout of the network.
-    s.loadTopo("testTopo.topo");
+    s.loadTopo("long_line.topo");
 
     # Add a noise model to all of the motes.
     s.loadNoise("no_noise.txt");
@@ -25,12 +25,17 @@ def main():
     # After sending a ping, simulate a little to prevent collision.
     s.runTime(1);
     # s.neighborDMP(1);
-    s.ping(2, 3, "Hello, World");
+    s.neighborDMP(12);
     s.runTime(1);
+    s.ping(1, 3, "Hi!"); #needs to be able to make this connection after flooding
+    # s.runTime(1);
+    # s.runTime(1);
+    s.runTime(1); #Need to add as many runtimes as needed to make sure it reaches the full topo
+    # s.neighborDMP(1);
+    # s.runTime(1);
     # s.neighborDMP(2);
-    s.ping(1, 4, "Hi!"); #needs to be able to make this connection after flooding
-    s.runTime(1);
-    s.neighborDMP(3);
+    # s.runTime(1);
+    # s.neighborDMP(3);
     s.runTime(1);
 
 if __name__ == '__main__':
