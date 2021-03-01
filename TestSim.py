@@ -139,15 +139,15 @@ def main():
     s.addChannel(s.GENERAL_CHANNEL);
     s.addChannel(s.NEIGHBOR_CHANNEL); # Added neighbor channel 
     s.addChannel(s.FLOODING_CHANNEL); # Added flooding channel
-
+    s.addChannel(s.ROUTING_CHANNEL);
     s.runTime(20);
     # s.neighborDMP(1);
-    s.ping(1, 2, "Hello, World");
-    s.runTime(20);
+    # s.ping(1, 2, "Hello, World");
+    # s.runTime(20);
     # s.neighborDMP(2);
-    s.ping(1, 4, "Hi!");
-    s.runTime(20);
-    s.neighborDMP(3);
+    # s.ping(1, 4, "Hi!");
+    # s.runTime(20);
+    s.neighborDMP(7);
     s.runTime(20);
 
 if __name__ == '__main__':

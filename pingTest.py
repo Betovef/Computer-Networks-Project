@@ -21,13 +21,23 @@ def main():
     s.addChannel(s.GENERAL_CHANNEL);
     s.addChannel(s.NEIGHBOR_CHANNEL); # Added channel to the simulation
     s.addChannel(s.FLOODING_CHANNEL);
+    s.addChannel(s.ROUTING_CHANNEL);
 
     # After sending a ping, simulate a little to prevent collision.
     s.runTime(1);
-    # s.neighborDMP(1);
-    s.neighborDMP(12);
+    # s.neighborDMP(3);
+    # s.runTime(1);
+    # s.neighborDMP(6);
+    # s.runTime(1);
+    # s.neighborDMP(9);
+    # s.runTime(1);
+    # s.neighborDMP(12);
+    # s.runTime(1);
+    # s.neighborDMP(16);
+    # s.runTime(1);
+    s.neighborDMP(19);
     s.runTime(1);
-    s.ping(1, 3, "Hi!"); #needs to be able to make this connection after flooding
+    # s.ping(1, 16, "Hi!"); #needs to be able to make this connection after flooding
     # s.runTime(1);
     # s.runTime(1);
     s.runTime(1); #Need to add as many runtimes as needed to make sure it reaches the full topo
