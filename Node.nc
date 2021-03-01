@@ -22,6 +22,7 @@ module Node{
    uses interface CommandHandler;
    uses interface NeighborDiscovery; //Added
    uses interface SimpleSend as FSender;
+   uses interface RoutingTable;
 }
 
 implementation{
@@ -32,8 +33,10 @@ implementation{
 
    event void Boot.booted(){
       call AMControl.start();
-      call NeighborDiscovery.start();
       dbg(GENERAL_CHANNEL, "Booted\n");
+      call NeighborDiscovery.start();
+      call RoutingTable.start();
+      
    }
 
    event void AMControl.startDone(error_t err){

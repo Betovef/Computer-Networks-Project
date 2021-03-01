@@ -1,4 +1,4 @@
-interface Flooding{
+interface RoutingTable{
     command void start();
     command void print();
     

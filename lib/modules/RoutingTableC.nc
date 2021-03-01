@@ -4,20 +4,23 @@ configuration RoutingTableC{
     provides interface RoutingTable;
 }
 implementation{
-    componets RoutingTable;
+    components RoutingTableP;
     RoutingTable = RoutingTableP.RoutingTable;
 
-    components new TimerMillic() as RoutingTimer;
+    components new TimerMilliC() as RoutingTimer;
     RoutingTableP.RoutingTimer->RoutingTimer;
 
     components new SimpleSendC(AM_ROUTING);
-    RoutingTable.RoutingSender->SimpleSendC;
+    RoutingTableP.RSender->SimpleSendC;
 
     components new AMReceiverC(AM_ROUTING);
-    RoutingTableP.MainReceive->AMReceiverC;
+    // RoutingTableP.InternalReceiver->AMReceiverC;
 
     components NeighborDiscoveryC;
     RoutingTableP.NeighborDiscovery -> NeighborDiscoveryC;
+
+    components RandomC as RandomTimer;
+    RoutingTableP.RandomTimer -> RandomTimer;
 
     
 }

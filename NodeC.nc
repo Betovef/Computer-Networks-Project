@@ -40,4 +40,7 @@ implementation {
 
     components CommandHandlerC;
     Node.CommandHandler -> CommandHandlerC;
+
+    components RoutingTableC;
+    Node.RoutingTable -> RoutingTableC;
 }

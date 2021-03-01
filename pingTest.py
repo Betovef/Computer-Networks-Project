@@ -35,8 +35,9 @@ def main():
     # s.runTime(1);
     # s.neighborDMP(16);
     # s.runTime(1);
-    s.neighborDMP(19);
-    s.runTime(1);
+    s.routeDMP(5);
+    # s.neighborDMP(19);
+    # s.runTime(1);
     # s.ping(1, 16, "Hi!"); #needs to be able to make this connection after flooding
     # s.runTime(1);
     # s.runTime(1);
