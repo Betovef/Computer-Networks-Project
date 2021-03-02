@@ -20,10 +20,11 @@ module Node{
    uses interface Receive;
    uses interface SimpleSend as Sender;
    uses interface CommandHandler;
-   
+
    uses interface NeighborDiscovery; //Added
    uses interface SimpleSend as FSender;
    uses interface Hashmap<uint16_t> as RoutingTable;
+   uses interface List<Route> as RouteTable;
    uses interface Routing;
 }
 

@@ -1,13 +1,15 @@
 #define AM_NEIGH 60
-#define NEIGHBORHOOD_SIZE 20
+#define NEIGHBORHOOD_SIZE 255
 
 configuration NeighborDiscoveryC{
     provides interface NeighborDiscovery;
+    uses interface List<Route> as RouteTableC;
 }
 implementation{
     
     components NeighborDiscoveryP;
     NeighborDiscovery = NeighborDiscoveryP.NeighborDiscovery;
+    NeighborDiscoveryP.RouteTable = RouteTableC;
 
     // components FloodingC;
     // NeighborDiscoveryP.Flooding -> FloodingC;
@@ -19,7 +21,6 @@ implementation{
     NeighborDiscoveryP.NeighborList->NeighborListC; //Uncoment
 
     components RoutingC;
-    // NeighborDiscoveryP.RoutingTable -> RoutingTableC;
     RoutingC.NeighborListC -> NeighborListC;
 
     components new TimerMilliC() as PeriodicTimer;
