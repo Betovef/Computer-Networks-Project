@@ -1,3 +1,5 @@
+#include "../../includes/route.h"
+
 module RoutingP{
     provides interface Routing;
 
@@ -8,9 +10,13 @@ module RoutingP{
     uses interface Random as RandomTimer;
     uses interface List<uint16_t> as NeighborList;
     uses interface Hashmap<uint16_t> as RoutingTable;
+    uses interface List<Route> as RouteTable;
 
 }
 implementation{  
+    uint16_t i;
+    uint16_t listSize;
+    Route packet; 
 
     //Periodic timer for updating the routing table
     command void Routing.start(){
@@ -34,14 +40,18 @@ implementation{
 
     //Poison Reverse technique implementation
 
-    //response to s.routeDMP(5);
-   
-    // Print Routing Table function
+    // Print Routing Table function (response to s.routeDMP())
     command void Routing.print(){
 
         dbg(ROUTING_CHANNEL, "Routing Table:\n");
-        dbg(ROUTING_CHANNEL, "Printing neighbors of %d: \n", TOS_NODE_ID);
-        dbg(ROUTING_CHANNEL, "%d and %d: \n", call NeighborList.get(0), call NeighborList.get(1));
+        dbg(ROUTING_CHANNEL, "Dest\t Hop\t Count\n");
+        listSize = call RouteTable.size();
+
+        for(i = 0; i< listSize; i++){
+            packet = call RouteTable.get(i);
+            dbg(ROUTING_CHANNEL, "%d\t %d\t %d\n", packet.dest, packet.nextHop, packet.cost);
+        }
+        
         
     /*
     Outputs:

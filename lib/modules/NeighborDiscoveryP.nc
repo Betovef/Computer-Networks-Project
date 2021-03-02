@@ -4,6 +4,7 @@
 #include "../../includes/packet.h"
 #include "../../includes/channels.h"
 #include "../../includes/protocol.h"
+#include "../../includes/route.h"
 
 module NeighborDiscoveryP{
     provides interface NeighborDiscovery;
@@ -16,11 +17,13 @@ module NeighborDiscoveryP{
     uses interface Random as RandomTimer;
     uses interface List<pack> as PacketList;
     uses interface List<uint16_t> as NeighborList;
+    uses interface List<Route> as RouteTable;
 
 }
 implementation{
 
     pack sendPackage;
+    Route routingPacket;
     uint16_t timer2;
     uint16_t timer1;
     uint32_t seqNum = 0;
@@ -85,6 +88,14 @@ implementation{
                if(inList == FALSE){
                // dbg(NEIGHBOR_CHANNEL, "Adding node %d to neighbor list...\n", myMsg->src);   
                call NeighborList.pushback(myMsg->src);
+               // routingPacket.src = myMsg->src;
+               routingPacket.dest = myMsg->src;
+               routingPacket.seq = myMsg->seq;
+               routingPacket.cost = 1;
+               routingPacket.nextHop = myMsg->src;
+               call RouteTable.pushback(routingPacket);
+
+
                }
                return msg;
                //At some point we implement flooding to continue broadcasting to other close nodes

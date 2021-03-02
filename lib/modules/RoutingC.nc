@@ -4,11 +4,13 @@ configuration RoutingC{
     provides interface Routing;
     uses interface List<uint16_t> as NeighborListC;
     uses interface Hashmap<uint16_t> as HashmapC;
+    uses interface List<Route> as RouteTableC;
 }
 implementation{
     components RoutingP;
     Routing = RoutingP.Routing;
     RoutingP.RoutingTable = HashmapC;
+    RoutingP.RouteTable = RouteTableC;
 
     components new TimerMilliC() as RoutingTimer;
     RoutingP.RoutingTimer->RoutingTimer;
