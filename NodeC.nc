@@ -11,7 +11,7 @@
 #include "includes/CommandMsg.h"
 #include "includes/packet.h"
 
-#define NEIGHBORHOOD_SIZE 4
+#define NEIGHBORHOOD_SIZE 255
 
 configuration NodeC{
 }
@@ -41,6 +41,13 @@ implementation {
     components CommandHandlerC;
     Node.CommandHandler -> CommandHandlerC;
 
-    components RoutingTableC;
-    Node.RoutingTable -> RoutingTableC;
+    components new HashmapC(uint16_t, NEIGHBORHOOD_SIZE) as HashmapC;
+    Node.RoutingTable -> HashmapC;
+
+    components RoutingC;
+    Node.Routing -> RoutingC;
+    RoutingC.HashmapC -> HashmapC;
+
+    
+
 }

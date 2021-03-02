@@ -16,7 +16,11 @@ implementation{
     NeighborDiscoveryP.PacketList-> PacketListC;
 
     components new ListC(uint16_t, NEIGHBORHOOD_SIZE) as NeighborListC;
-    NeighborDiscoveryP.NeighborList->NeighborListC;
+    NeighborDiscoveryP.NeighborList->NeighborListC; //Uncoment
+
+    components RoutingC;
+    // NeighborDiscoveryP.RoutingTable -> RoutingTableC;
+    RoutingC.NeighborListC -> NeighborListC;
 
     components new TimerMilliC() as PeriodicTimer;
     NeighborDiscoveryP.PeriodicTimer -> PeriodicTimer; // Timer to send neighbor dircovery packets periodically

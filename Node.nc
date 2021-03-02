@@ -20,9 +20,11 @@ module Node{
    uses interface Receive;
    uses interface SimpleSend as Sender;
    uses interface CommandHandler;
+   
    uses interface NeighborDiscovery; //Added
    uses interface SimpleSend as FSender;
-   uses interface RoutingTable;
+   uses interface Hashmap<uint16_t> as RoutingTable;
+   uses interface Routing;
 }
 
 implementation{
@@ -32,11 +34,11 @@ implementation{
    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
 
    event void Boot.booted(){
-      call AMControl.start();
+      
       dbg(GENERAL_CHANNEL, "Booted\n");
       call NeighborDiscovery.start();
-      call RoutingTable.start();
-      
+      call Routing.start();
+      call AMControl.start();
    }
 
    event void AMControl.startDone(error_t err){
@@ -76,7 +78,9 @@ implementation{
       call NeighborDiscovery.print();
    }
 
-   event void CommandHandler.printRouteTable(){}
+   event void CommandHandler.printRouteTable(){
+      call Routing.print();
+   }
 
    event void CommandHandler.printLinkState(){}
 

@@ -1,18 +1,20 @@
-module RoutingTableP{
-    provides interface RoutingTable;
+module RoutingP{
+    provides interface Routing;
 
     uses interface Timer<TMilli> as RoutingTimer;
     uses interface SimpleSend as RSender;
     // uses interface Receive as InternalReceiver;
     uses interface NeighborDiscovery;
     uses interface Random as RandomTimer;
+    uses interface List<uint16_t> as NeighborList;
+    uses interface Hashmap<uint16_t> as RoutingTable;
 
 }
 implementation{  
 
     //Periodic timer for updating the routing table
-    command void RoutingTable.start(){
-        dbg(ROUTING_CHANNEL, "Starting Routing protoco..\n");
+    command void Routing.start(){
+        // dbg(ROUTING_CHANNEL, "Starting Routing protoco..\n");
         call RoutingTimer.startPeriodic(10000 + (uint16_t)((call RandomTimer.rand16())%10000)); 
     }
 
@@ -32,8 +34,15 @@ implementation{
 
     //Poison Reverse technique implementation
 
+    //response to s.routeDMP(5);
+   
     // Print Routing Table function
-    command void RoutingTable.print(){
+    command void Routing.print(){
+
+        dbg(ROUTING_CHANNEL, "Routing Table:\n");
+        dbg(ROUTING_CHANNEL, "Printing neighbors of %d: \n", TOS_NODE_ID);
+        dbg(ROUTING_CHANNEL, "%d and %d: \n", call NeighborList.get(0), call NeighborList.get(1));
+        
     /*
     Outputs:
     DEBUG(1): Routing Packet -src: 3, dest: 10, seq: 0, next hop: 2, cost: 26
