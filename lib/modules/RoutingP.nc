@@ -35,11 +35,19 @@ implementation{
     //crete struct(or header file) to store DVR information
 
     //RIP implementation (route advertising and merging routes)
+    /*
 
+    */
     //Split Horizon implementation 
-
+    /*
+    Prevents routing loops in protocol by preventing a router from broadcasting a route back onto the interface from which it was learned.
+    Example: if a-b-c and a sends to c, a does not have to advertise its route for c back to b
+    */
     //Poison Reverse technique implementation
-
+    /*
+    Prevents router from sending packets through a route that has become invalid
+    If an invalid/unreachable route is detected, all other routers are informed that the bad route has a inf route metric (make it very long or infinite)
+    */
     // Print Routing Table function (response to s.routeDMP())
     command void Routing.print(){
 
