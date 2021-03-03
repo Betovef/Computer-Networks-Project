@@ -39,15 +39,20 @@ implementation{
 
     */
     //Split Horizon implementation 
-    /*
-    Prevents routing loops in protocol by preventing a router from broadcasting a route back onto the interface from which it was learned.
-    Example: if a-b-c and a sends to c, a does not have to advertise its route for c back to b
-    */
+        //More info on project2notes.txt
+        /*
+        Example: A-B-C
+        router A learns about C through B
+        if A learned about C through B
+            A will not send info about C to B
+        */
     //Poison Reverse technique implementation
-    /*
-    Prevents router from sending packets through a route that has become invalid
-    If an invalid/unreachable route is detected, all other routers are informed that the bad route has a inf route metric (make it very long or infinite)
-    */
+        //More info on project2notes.txt
+        /*
+        if route is unreachable
+            route == inf
+            broadcast to other nodes/routers
+        */
     // Print Routing Table function (response to s.routeDMP())
     command void Routing.print(){
 
