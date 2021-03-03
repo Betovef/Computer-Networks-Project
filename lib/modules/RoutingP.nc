@@ -51,12 +51,30 @@ implementation{
 
 
     //RIP implementation (route advertising and merging routes)
-
+    /*  
+        Node tells immediate neighbors of dist to all other nodes
+        Create and update routing table
+        Determine next-hop and shortest paths
+        Send packet using next-hops as directed by routing table
+    */
     //Split Horizon implementation 
-
+        //More info on project2notes.txt
+        /*
+        Example: A-B-C
+        router A learns about C through B
+        if A learned about C through B
+            A will not send info about C to B
+        */
     //Poison Reverse technique implementation
+        //More info on project2notes.txt
+        /*
+        if route is unreachable
+            route == inf
+            broadcast to other nodes/routers
+        */
 
     // Print Routing Table function (response to s.routeDMP())
+    //The entire routing table should be printed when the command routingTableDump is called
     command void Routing.print(){
 
         dbg(ROUTING_CHANNEL, "Routing Table:\n");
