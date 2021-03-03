@@ -35,8 +35,11 @@ implementation{
     //crete struct(or header file) to store DVR information
 
     //RIP implementation (route advertising and merging routes)
-    /*
-
+    /*  
+        Node tells immediate neighbors of dist to all other nodes
+        Create and update routing table
+        Determine next-hop and shortest paths
+        Send packet using next-hops as directed by routing table
     */
     //Split Horizon implementation 
         //More info on project2notes.txt
