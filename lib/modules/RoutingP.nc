@@ -43,7 +43,15 @@ implementation{
     command void mergeRoutes(){
         
 
-    } 
+    }
+
+    command void splitHorizon(){
+
+    }
+
+    command void poisonReverse(){
+        
+    }
 
     // event message_t* InternalReceiver.receive(message_t* msg, void* payload, uint8_t len){
     //     return msg;
