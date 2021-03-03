@@ -56,7 +56,9 @@ implementation{
             route == inf
             broadcast to other nodes/routers
         */
+
     // Print Routing Table function (response to s.routeDMP())
+    //The entire routing table should be printed when the command routingTableDump is called
     command void Routing.print(){
 
         dbg(ROUTING_CHANNEL, "Routing Table:\n");
