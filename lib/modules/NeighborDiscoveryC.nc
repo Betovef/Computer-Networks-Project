@@ -4,12 +4,14 @@
 configuration NeighborDiscoveryC{
     provides interface NeighborDiscovery;
     uses interface List<Route> as RouteTableC;
+    uses interface Hashmap<Route> as RoutingTableC;
 }
 implementation{
     
     components NeighborDiscoveryP;
     NeighborDiscovery = NeighborDiscoveryP.NeighborDiscovery;
     NeighborDiscoveryP.RouteTable = RouteTableC;
+    NeighborDiscoveryP.RoutingTable = RoutingTableC;
 
     // components FloodingC;
     // NeighborDiscoveryP.Flooding -> FloodingC;

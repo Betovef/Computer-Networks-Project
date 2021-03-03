@@ -3,7 +3,7 @@
 configuration RoutingC{
     provides interface Routing;
     uses interface List<uint16_t> as NeighborListC;
-    uses interface Hashmap<uint16_t> as HashmapC;
+    uses interface Hashmap<Route> as HashmapC;
     uses interface List<Route> as RouteTableC;
 }
 implementation{

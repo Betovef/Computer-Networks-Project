@@ -18,6 +18,7 @@ module NeighborDiscoveryP{
     uses interface List<pack> as PacketList;
     uses interface List<uint16_t> as NeighborList;
     uses interface List<Route> as RouteTable;
+    uses interface Hashmap<Route> as RoutingTable;
 
 }
 implementation{
@@ -94,6 +95,7 @@ implementation{
                routingPacket.cost = 1;
                routingPacket.nextHop = myMsg->src;
                call RouteTable.pushback(routingPacket);
+               call RoutingTable.insert(myMsg->src, routingPacket);
 
 
                }

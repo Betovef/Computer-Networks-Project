@@ -8,7 +8,7 @@ def main():
     s.runTime(1);
 
     # Load the the layout of the network.
-    s.loadTopo("testTopo.topo");
+    s.loadTopo("book_example.topo");
 
     # Add a noise model to all of the motes.
     s.loadNoise("no_noise.txt");
@@ -28,7 +28,7 @@ def main():
     # s.neighborDMP(3);
     # s.runTime(1);
     # s.neighborDMP(6);
-    s.routeDMP(2);
+    s.routeDMP(1);
     s.runTime(1);
     # s.neighborDMP(3);
     # s.runTime(1);
@@ -39,12 +39,12 @@ def main():
     # s.routeDMP(5);
     # s.neighborDMP(19);
     # s.runTime(1);
-    s.ping(1, 4, "Hi!"); #needs to be able to make this connection after flooding
+    s.ping(1, 3, "Hi!"); #needs to be able to make this connection after flooding
     # s.runTime(1);
     # s.runTime(1);
     # s.runTime(1); #Need to add as many runtimes as needed to make sure it reaches the full topo
     # s.neighborDMP(1);
-    # s.runTime(1);
+    s.runTime(1);
     # s.neighborDMP(2);
     # s.runTime(1);
     # s.neighborDMP(3);

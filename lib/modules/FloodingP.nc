@@ -12,6 +12,7 @@ module FloodingP{
     uses interface SimpleSend as InternalSender;
     uses interface Receive as InternalReceiver;
     uses interface List<pack> as PacketList;
+    //need to wire the routing table
 }
 implementation{
     pack sendPackage;
@@ -25,6 +26,12 @@ implementation{
         msg.seq++;
         call InternalSender.send(msg, AM_BROADCAST_ADDR);
     }
+
+    // command error_t RSender.send(pack msg, uint16_t dest){
+    //     // dbg(ROUTING_CHANNEL, "Routing Packet -src: %d, dest: %d, seq: %d, next hop: %d, cost: %d", TOS_NODE_ID, dest, msg.seq,   )
+    //     call InternalSender.send(msg, AM_BROADCAST_ADDR);
+    // }
+    
 
     event message_t* InternalReceiver.receive(message_t* msg, void* payload, uint8_t len){
       

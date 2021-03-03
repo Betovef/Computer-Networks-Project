@@ -1,5 +1,7 @@
 #include "../../includes/route.h"
 
+#define TABLE_SIZE 8 //change value accordingly
+
 module RoutingP{
     provides interface Routing;
 
@@ -9,7 +11,7 @@ module RoutingP{
     uses interface NeighborDiscovery;
     uses interface Random as RandomTimer;
     uses interface List<uint16_t> as NeighborList;
-    uses interface Hashmap<uint16_t> as RoutingTable;
+    uses interface Hashmap<Route> as RoutingTable;
     uses interface List<Route> as RouteTable;
 
 }
@@ -26,13 +28,27 @@ implementation{
 
     event void RoutingTimer.fired(){
 
+        // call Routing.initializeTable();
     }
+
+    command void Routing.initializeTable(){
+        Route newPacket;
+        for(i = 1; i< TABLE_SIZE; i++){
+            newPacket.dest = i;
+            newPacket.cost = 255; // "infinity"
+            call RoutingTable.insert(i, newPacket);
+        }
+    }
+
+    command void mergeRoutes(){
+        
+
+    } 
 
     // event message_t* InternalReceiver.receive(message_t* msg, void* payload, uint8_t len){
     //     return msg;
     // }
 
-    //crete struct(or header file) to store DVR information
 
     //RIP implementation (route advertising and merging routes)
 
@@ -45,22 +61,19 @@ implementation{
 
         dbg(ROUTING_CHANNEL, "Routing Table:\n");
         dbg(ROUTING_CHANNEL, "Dest\t Hop\t Count\n");
-        listSize = call RouteTable.size();
+        // listSize = call RouteTable.size();
 
-        for(i = 0; i< listSize; i++){
-            packet = call RouteTable.get(i);
+        // for(i = 0; i< TABLE_SIZE; i++){
+        //     packet = call RouteTable.get(i);
+        //     dbg(ROUTING_CHANNEL, "%d\t %d\t %d\n", packet.dest, packet.nextHop, packet.cost);
+        // }
+
+        listSize = call RoutingTable.size();
+
+        for(i = 1; i< TABLE_SIZE; i++){
+            packet = call RoutingTable.get(i);
             dbg(ROUTING_CHANNEL, "%d\t %d\t %d\n", packet.dest, packet.nextHop, packet.cost);
         }
-        
-        
-    /*
-    Outputs:
-    DEBUG(1): Routing Packet -src: 3, dest: 10, seq: 0, next hop: 2, cost: 26
-    DEBUG (3): Routing Table:
-    DEBUG (3): Dest  Hop  Count
-    DEBUG (3): 6  6  1
-    */
-
     }
 
 }
