@@ -23,7 +23,7 @@ module Node{
 
    uses interface NeighborDiscovery; //Added
    uses interface SimpleSend as FSender;
-   uses interface Hashmap<uint16_t> as RoutingTable;
+   uses interface Hashmap<Route> as RoutingTable;
    uses interface List<Route> as RouteTable;
    uses interface Routing;
 }
@@ -37,6 +37,7 @@ implementation{
    event void Boot.booted(){
       
       dbg(GENERAL_CHANNEL, "Booted\n");
+      call Routing.initializeTable();
       call NeighborDiscovery.start();
       call Routing.start();
       call AMControl.start();
@@ -68,10 +69,19 @@ implementation{
    event void CommandHandler.ping(uint16_t destination, uint8_t *payload){ //runs only once
 
       dbg(GENERAL_CHANNEL, "PING EVENT \n"); //node x is trying to send to node y (TOS_NODE_ID to destination)
-      makePack(&sendPackage, TOS_NODE_ID, destination, 20, PROTOCOL_PING, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
-      // call Sender.send(sendPackage, AM_BROADCAST_ADDR); //destination needs to be AM_BROADCAST_ADDR (everywhere) Note- note sure if we still need this after implementing flooding
-      dbg(GENERAL_CHANNEL, "Flooding packet from node %d to %d\n", TOS_NODE_ID, destination);
-      call FSender.send(sendPackage, AM_BROADCAST_ADDR); //Starting flooding when protocol ping is called
+      if(call RoutingTable.contains(destination)){
+         makePack(&sendPackage, TOS_NODE_ID, destination, 20, PROTOCOL_LINKEDLIST, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
+         // call Sender.send(sendPackage, AM_BROADCAST_ADDR); //destination needs to be AM_BROADCAST_ADDR (everywhere) Note- note sure if we still need this after implementing flooding
+         dbg(GENERAL_CHANNEL, "Routing packet from %d to %d\n", TOS_NODE_ID, destination);
+         call FSender.send(sendPackage, destination); //Starting flooding when protocol ping is called
+      }
+      else{
+         makePack(&sendPackage, TOS_NODE_ID, destination, 20, PROTOCOL_PING, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
+         // call Sender.send(sendPackage, AM_BROADCAST_ADDR); //destination needs to be AM_BROADCAST_ADDR (everywhere) Note- note sure if we still need this after implementing flooding
+         dbg(GENERAL_CHANNEL, "There is not route, flooding packet from node %d to %d\n", TOS_NODE_ID, destination);
+         call FSender.send(sendPackage, AM_BROADCAST_ADDR); //Starting flooding when protocol ping is called
+      }
+      
       
    }
 

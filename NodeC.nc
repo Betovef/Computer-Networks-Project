@@ -24,6 +24,7 @@ implementation {
     components NeighborDiscoveryC; 
     Node.NeighborDiscovery -> NeighborDiscoveryC;
     NeighborDiscoveryC.RouteTableC -> RouteTableC;
+    NeighborDiscoveryC.RoutingTableC -> HashmapC;
 
 
     components FloodingC;
@@ -43,7 +44,7 @@ implementation {
     components CommandHandlerC;
     Node.CommandHandler -> CommandHandlerC;
 
-    components new HashmapC(uint16_t, NEIGHBORHOOD_SIZE) as HashmapC;
+    components new HashmapC(Route, NEIGHBORHOOD_SIZE) as HashmapC;
     Node.RoutingTable -> HashmapC;
 
     components new ListC(Route, NEIGHBORHOOD_SIZE) as RouteTableC;
