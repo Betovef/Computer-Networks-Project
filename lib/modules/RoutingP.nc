@@ -75,10 +75,12 @@ implementation{
                 }
                 DVRinfo = call RoutingTable.get(j);
                 DVRinfop = &DVRinfo;
-                // dbg(ROUTING_CHANNEL, "Sending route Dest: %d Hop: %d Count: to node %d\n", DVRinfop->dest, DVRinfop->nextHop, DVRinfop->cost, neighbor);
-                makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 10, PROTOCOL_LINKEDLIST, seqNum, (uint8_t *) DVRinfop, PACKET_MAX_PAYLOAD_SIZE);
-                seqNum++;
-                call RSender.send(sendPackage, neighbor);
+                if(DVRinfop->cost != 255){
+                    // dbg(ROUTING_CHANNEL, "Sending route Dest: %d Hop: %d Count: to node %d\n", DVRinfop->dest, DVRinfop->nextHop, DVRinfop->cost, neighbor);
+                    makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 10, PROTOCOL_LINKEDLIST, seqNum, (uint8_t *) DVRinfop, PACKET_MAX_PAYLOAD_SIZE);
+                    seqNum++;
+                    call RSender.send(sendPackage, neighbor);
+                } 
             }
         }
     } 
@@ -94,13 +96,10 @@ implementation{
 
             temp = call RoutingTable.get(newRoute->dest);
             nodeRoute = &temp;
-            if(newRoute->dest == nodeRoute->dest){
+            // if(newRoute->dest == nodeRoute->dest){
                 if(newRoute->cost+1 < nodeRoute->cost){
                     // dbg(ROUTING_CHANNEL,"Old Route: Dest: %d Hop: %d Count: %d\n", nodeRoute->dest, nodeRoute->nextHop, nodeRoute->cost);
                     // dbg(ROUTING_CHANNEL,"Better Route: Dest: %d Hop: %d Count: %d + (1)\n", newRoute->dest, myMsg->src, newRoute->cost);
-                    if(TOS_NODE_ID >7){
-                        dbg(ROUTING_CHANNEL, "Found a better route\n");
-                    }
                     
                     // dbg(ROUTING_CHANNEL, "Before:\n");
                     // call Routing.print();
@@ -109,10 +108,22 @@ implementation{
                     newPacket.cost = newRoute->cost + 1;
                     newPacket.dest = newRoute->dest;
                     call RoutingTable.insert(newRoute->dest, newPacket);
+                    listSize = call NeighborList.size();
+                    newRoute = &newPacket;
+
+                    for(k = 0; k<listSize; k++){
+                        if(neighbor != k){
+                            makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 10, PROTOCOL_LINKEDLIST, seqNum, (uint8_t *) newRoute, PACKET_MAX_PAYLOAD_SIZE);
+                            seqNum++;
+                            call RSender.send(sendPackage, neighbor); 
+                        }
+                    }
+                    return msg;
                     // dbg(ROUTING_CHANNEL, "After:\n");
                     // call Routing.print();
                 }
-            }
+                return msg;
+            // }
         }
         return msg;
     }

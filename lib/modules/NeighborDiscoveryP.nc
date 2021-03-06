@@ -95,6 +95,7 @@ implementation{
                routingPacket.cost = 1;
                routingPacket.nextHop = myMsg->src;
                call RouteTable.pushback(routingPacket);
+               call RoutingTable.remove(myMsg->src);
                call RoutingTable.insert(myMsg->src, routingPacket);
 
 

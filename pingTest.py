@@ -24,8 +24,8 @@ def main():
     s.addChannel(s.ROUTING_CHANNEL);
 
     # After sending a ping, simulate a little to prevent collision.
-    s.runTime(500);
-    s.routeDMP(17);
+    s.runTime(100);
+    s.routeDMP(9);
     s.runTime(1);
  
 
