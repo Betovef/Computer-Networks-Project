@@ -8,7 +8,7 @@ def main():
     s.runTime(1);
 
     # Load the the layout of the network.
-    s.loadTopo("long_line.topo");
+    s.loadTopo("book_example.topo");
 
     # Add a noise model to all of the motes.
     s.loadNoise("no_noise.txt");
@@ -27,9 +27,11 @@ def main():
 
     # ***IMPORTANT*** - change TABLE_SIZE according to the number of nodes when using routing
     s.runTime(100);
-    # s.routeDMP(9);
-    s.ping(1, 18, "Hello, World");
-    s.runTime(200);
+    s.routeDMP(1);
+    s.runTime(100);
+    # s.routeDMP(7);
+    s.ping(1, 7, "Hello World!\n");
+    s.runTime(100);
  
 
 if __name__ == '__main__':

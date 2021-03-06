@@ -57,7 +57,7 @@ implementation{
             }
             else if(myMsg->protocol == PROTOCOL_LINKEDLIST){
                 call PacketList.pushback(*myMsg);
-                makePack(&sendPackage, TOS_NODE_ID, myMsg->dest, myMsg->TTL-1, PROTOCOL_LINKEDLIST, seqNum, (uint8_t *)myMsg->payload, PACKET_MAX_PAYLOAD_SIZE);
+                makePack(&sendPackage, TOS_NODE_ID, myMsg->dest, myMsg->TTL-1, PROTOCOL_LINKEDLIST, seqNum+1, (uint8_t *)myMsg->payload, PACKET_MAX_PAYLOAD_SIZE);
                 call RSender.send(sendPackage, myMsg->dest);
                 return msg;
             }

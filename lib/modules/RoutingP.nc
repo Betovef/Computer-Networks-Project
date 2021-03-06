@@ -4,7 +4,7 @@
 #include "../../includes/channels.h"
 #include "../../includes/protocol.h"
 
-#define TABLE_SIZE 20 //change value accordingly
+#define TABLE_SIZE 8 //change value accordingly
 #define MAX_TTL 10;
 
 module RoutingP{
@@ -77,8 +77,7 @@ implementation{
                 DVRinfop = &DVRinfo;
                 if(DVRinfop->cost != 255){
                     // dbg(ROUTING_CHANNEL, "Sending route Dest: %d Hop: %d Count: to node %d\n", DVRinfop->dest, DVRinfop->nextHop, DVRinfop->cost, neighbor);
-                    makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 10, PROTOCOL_LINKEDLIST, seqNum, (uint8_t *) DVRinfop, PACKET_MAX_PAYLOAD_SIZE);
-                    seqNum++;
+                    makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 10, PROTOCOL_LINKEDLIST, seqNum+1, (uint8_t *) DVRinfop, PACKET_MAX_PAYLOAD_SIZE);
                     call RSender.send(sendPackage, neighbor);
                 } 
             }
@@ -104,6 +103,7 @@ implementation{
                     // dbg(ROUTING_CHANNEL, "Before:\n");
                     // call Routing.print();
                     call RoutingTable.remove(k);
+                    newPacket.seq = newRoute->seq;
                     newPacket.nextHop = myMsg->src;
                     newPacket.cost = newRoute->cost + 1;
                     newPacket.dest = newRoute->dest;
@@ -113,8 +113,7 @@ implementation{
 
                     for(k = 0; k<listSize; k++){
                         if(k != neighbor){
-                            makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 10, PROTOCOL_LINKEDLIST, seqNum, (uint8_t *) newRoute, PACKET_MAX_PAYLOAD_SIZE);
-                            seqNum++;
+                            makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 10, PROTOCOL_LINKEDLIST, seqNum+1, (uint8_t *) newRoute, PACKET_MAX_PAYLOAD_SIZE);
                             call RSender.send(sendPackage, neighbor); 
                         }
                     }
