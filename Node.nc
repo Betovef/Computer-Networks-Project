@@ -79,7 +79,7 @@ implementation{
       else{
          makePack(&sendPackage, TOS_NODE_ID, destination, 20, PROTOCOL_PING, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
          // call Sender.send(sendPackage, AM_BROADCAST_ADDR); //destination needs to be AM_BROADCAST_ADDR (everywhere) Note- note sure if we still need this after implementing flooding
-         dbg(GENERAL_CHANNEL, "There is not route, flooding packet from node %d to %d\n", TOS_NODE_ID, destination);
+         dbg(GENERAL_CHANNEL, "There is no route, flooding packet from node %d to %d\n", TOS_NODE_ID, destination);
          call FSender.send(sendPackage, AM_BROADCAST_ADDR); //Starting flooding when protocol ping is called
       }
       
