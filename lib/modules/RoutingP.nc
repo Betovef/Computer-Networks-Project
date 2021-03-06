@@ -48,14 +48,14 @@ implementation{
             if(i == TOS_NODE_ID){
                 newPacket.cost = 0;
                 newPacket.nextHop = i;
-                call RoutingTable.insert(i, newPacket);
+                //call RoutingTable.insert(i, newPacket);
             }
             else{
                 newPacket.cost = 255; // "infinity"
                 newPacket.nextHop = 0;
-                call RoutingTable.insert(i, newPacket);
+                //call RoutingTable.insert(i, newPacket);
             }
-            
+            call RoutingTable.insert(i, newPacket);
         }
     }
 
