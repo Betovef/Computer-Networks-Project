@@ -3,10 +3,13 @@
 
 configuration FloodingC{
     provides interface SimpleSend as FSender;
+    provides interface SimpleSend as RSender;
+    uses interface Hashmap<Route> as HashmapC;
 }
 implementation{
 
     components FloodingP;
+    FloodingP.RoutingTable = HashmapC;
     // Flooding = FloodingP.Flooding;
     
     components NeighborDiscoveryC;
@@ -24,5 +27,6 @@ implementation{
 
     components new SimpleSendC(AM_FLOOD); 
     FSender = FloodingP.FSender;
+    RSender = FloodingP.RSender;
     FloodingP.InternalSender -> SimpleSendC;
 }

@@ -29,6 +29,7 @@ implementation {
 
     components FloodingC;
     Node.FSender -> FloodingC.FSender;
+    Node.RSender -> FloodingC.RSender;
     // Node.FSender -> FloodingC.FSender;
 
     Node -> MainC.Boot;
@@ -52,8 +53,9 @@ implementation {
 
     components RoutingC;
     Node.Routing -> RoutingC;
-    RoutingC.RouteTableC -> RouteTableC;
+    RoutingC.RouteTableC -> RouteTableC; //not using this -delete later
     RoutingC.HashmapC -> HashmapC;
+    FloodingC.HashmapC -> HashmapC;
 
 
     

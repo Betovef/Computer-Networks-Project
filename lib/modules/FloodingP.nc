@@ -2,17 +2,19 @@
 #include "../../includes/packet.h"
 #include "../../includes/channels.h"
 #include "../../includes/protocol.h"
+#include "../../includes/route.h"
 
 
 module FloodingP{
     provides interface SimpleSend as FSender;
+    provides interface SimpleSend as RSender;
     uses interface NeighborDiscovery;
 
     //internal interfaces
     uses interface SimpleSend as InternalSender;
     uses interface Receive as InternalReceiver;
     uses interface List<pack> as PacketList;
-    //need to wire the routing table
+    uses interface Hashmap<Route> as RoutingTable;
 }
 implementation{
     pack sendPackage;
@@ -27,10 +29,14 @@ implementation{
         call InternalSender.send(msg, AM_BROADCAST_ADDR);
     }
 
-    // command error_t RSender.send(pack msg, uint16_t dest){
-    //     // dbg(ROUTING_CHANNEL, "Routing Packet -src: %d, dest: %d, seq: %d, next hop: %d, cost: %d", TOS_NODE_ID, dest, msg.seq,   )
-    //     call InternalSender.send(msg, AM_BROADCAST_ADDR);
-    // }
+    command error_t RSender.send(pack msg, uint16_t dest){
+        Route route;
+        route = call RoutingTable.get(dest);
+
+        dbg(ROUTING_CHANNEL, "Routing Packet -src: %d, dest: %d, seq: %d, next hop: %d, cost: %d\n", TOS_NODE_ID, dest, msg.seq, route.nextHop, route.cost);
+        msg.seq++;
+        call InternalSender.send(msg, route.nextHop);
+    }
     
 
     event message_t* InternalReceiver.receive(message_t* msg, void* payload, uint8_t len){
@@ -48,6 +54,12 @@ implementation{
                     dbg(GENERAL_CHANNEL, "Pinging... \n"); 
                     dbg(GENERAL_CHANNEL, "Package Payload: %s\n", myMsg->payload);   
                     return msg;
+            }
+            else if(myMsg->protocol == PROTOCOL_LINKEDLIST){
+                call PacketList.pushback(*myMsg);
+                makePack(&sendPackage, TOS_NODE_ID, myMsg->dest, myMsg->TTL-1, PROTOCOL_LINKEDLIST, seqNum, (uint8_t *)myMsg->payload, PACKET_MAX_PAYLOAD_SIZE);
+                call RSender.send(sendPackage, myMsg->dest);
+                return msg;
             }
             else{
                 call PacketList.pushback(*myMsg);

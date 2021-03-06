@@ -23,8 +23,9 @@ module Node{
 
    uses interface NeighborDiscovery; //Added
    uses interface SimpleSend as FSender;
+   uses interface SimpleSend as RSender;
    uses interface Hashmap<Route> as RoutingTable;
-   uses interface List<Route> as RouteTable;
+   uses interface List<Route> as RouteTable; //not using this -delete later
    uses interface Routing;
 }
 
@@ -73,7 +74,7 @@ implementation{
          makePack(&sendPackage, TOS_NODE_ID, destination, 20, PROTOCOL_LINKEDLIST, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
          // call Sender.send(sendPackage, AM_BROADCAST_ADDR); //destination needs to be AM_BROADCAST_ADDR (everywhere) Note- note sure if we still need this after implementing flooding
          dbg(GENERAL_CHANNEL, "Routing packet from %d to %d\n", TOS_NODE_ID, destination);
-         call FSender.send(sendPackage, destination); //Starting flooding when protocol ping is called
+         call RSender.send(sendPackage, destination); //Starting flooding when protocol ping is called
       }
       else{
          makePack(&sendPackage, TOS_NODE_ID, destination, 20, PROTOCOL_PING, 0, payload, PACKET_MAX_PAYLOAD_SIZE);

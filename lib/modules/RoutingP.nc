@@ -112,7 +112,7 @@ implementation{
                     newRoute = &newPacket;
 
                     for(k = 0; k<listSize; k++){
-                        if(neighbor != k){
+                        if(k != neighbor){
                             makePack(&sendPackage, TOS_NODE_ID, AM_BROADCAST_ADDR, 10, PROTOCOL_LINKEDLIST, seqNum, (uint8_t *) newRoute, PACKET_MAX_PAYLOAD_SIZE);
                             seqNum++;
                             call RSender.send(sendPackage, neighbor); 

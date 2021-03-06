@@ -24,9 +24,12 @@ def main():
     s.addChannel(s.ROUTING_CHANNEL);
 
     # After sending a ping, simulate a little to prevent collision.
+
+    # ***IMPORTANT*** - change TABLE_SIZE according to the number of nodes when using routing
     s.runTime(100);
-    s.routeDMP(9);
-    s.runTime(1);
+    # s.routeDMP(9);
+    s.ping(1, 18, "Hello, World");
+    s.runTime(200);
  
 
 if __name__ == '__main__':
