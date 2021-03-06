@@ -39,7 +39,7 @@ implementation{
    command void NeighborDiscovery.start(){ //command called when booting
     timer1 = (1000 + (uint16_t)((call RandomTimer.rand16())%1000)); 
     timer2 = (2000 + (uint16_t)((call RandomTimer.rand16())%2000));
-    dbg(NEIGHBOR_CHANNEL, "Timer: %d to %d\n", timer1, timer2); //created a peridoic timer from period t1 to t2
+    dbg(NEIGHBOR_CHANNEL, "Neighbor discovery timer: %d + %d\n", timer1, timer2); //created a peridoic timer from period t1 to t2
     call PeriodicTimer.startPeriodicAt(timer1, timer2); //the first timer will fire first
    } 
 

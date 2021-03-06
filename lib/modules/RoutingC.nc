@@ -19,7 +19,7 @@ implementation{
     RoutingP.RSender->SimpleSendC;
 
     components new AMReceiverC(AM_ROUTING);
-    // RoutingTableP.InternalReceiver->AMReceiverC;
+    RoutingP.InternalReceiver->AMReceiverC;
 
     components NeighborDiscoveryC;
     RoutingP.NeighborDiscovery -> NeighborDiscoveryC;

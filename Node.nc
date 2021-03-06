@@ -37,10 +37,10 @@ implementation{
    event void Boot.booted(){
       
       dbg(GENERAL_CHANNEL, "Booted\n");
+      call AMControl.start();
       call Routing.initializeTable();
       call NeighborDiscovery.start();
       call Routing.start();
-      call AMControl.start();
    }
 
    event void AMControl.startDone(error_t err){
