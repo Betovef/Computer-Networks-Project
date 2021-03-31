@@ -4,7 +4,7 @@
 #include "../../includes/channels.h"
 #include "../../includes/protocol.h"
 
-#define TABLE_SIZE 8 //change value accordingly
+#define TABLE_SIZE 8 //change value accordingly -- make dynamic
 #define MAX_TTL 10;
 
 module RoutingP{
@@ -43,7 +43,7 @@ implementation{
     command void Routing.initializeTable(){
         Route newPacket;
         listSize = call RoutingTable.size();
-        for(i = 1; i< TABLE_SIZE; i++){
+        for(i = 1; i< TABLE_SIZE; i++){ //find a way to make routing table size dynamic
             newPacket.dest = i;
             if(i == TOS_NODE_ID){
                 newPacket.cost = 0;
