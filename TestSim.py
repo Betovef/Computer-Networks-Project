@@ -140,6 +140,7 @@ def main():
     s.addChannel(s.NEIGHBOR_CHANNEL); # Added neighbor channel 
     s.addChannel(s.FLOODING_CHANNEL); # Added flooding channel
     s.addChannel(s.ROUTING_CHANNEL);
+    s.addChannel(s.TRANSPORT_CHANNEL);
     s.runTime(20);
     # s.neighborDMP(1);
     # s.ping(1, 2, "Hello, World");

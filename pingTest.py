@@ -8,7 +8,7 @@ def main():
     s.runTime(1);
 
     # Load the the layout of the network.
-    s.loadTopo("book_example.topo");
+    s.loadTopo("long_line.topo");
 
     # Add a noise model to all of the motes.
     s.loadNoise("no_noise.txt");
@@ -22,15 +22,16 @@ def main():
     s.addChannel(s.NEIGHBOR_CHANNEL); # Added channel to the simulation
     s.addChannel(s.FLOODING_CHANNEL);
     s.addChannel(s.ROUTING_CHANNEL);
+    s.addChannel(s.TRANSPORT_CHANNEL);
 
     # After sending a ping, simulate a little to prevent collision.
 
     # ***IMPORTANT*** - change TABLE_SIZE according to the number of nodes when using routing
     s.runTime(100);
-    s.routeDMP(1);
+    s.routeDMP(9);
     s.runTime(100);
     # s.routeDMP(7);
-    s.ping(1, 7, "Hello World!\n");
+    s.ping(1, 8, "Hello World!\n");
     s.runTime(100);
  
 
