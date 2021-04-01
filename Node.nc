@@ -103,14 +103,28 @@ implementation{
    socket_addr_t serverSocketAddress;
    socket_t fd;
    event void CommandHandler.setTestServer(uint16_t port){
-      dbg(TRANSPORT_CHANNEL, "Initiating server as node %d and binding to port %d\n", TOS_NODE_ID, port);
+      dbg(TRANSPORT_CHANNEL, "Initiating server at node %d and binding it to port %d\n", TOS_NODE_ID, port);
 
       // socket_addr_t serverSocketAddress;
       // socket_t fd;
-
-      fd =  call Transport.socket();
       serverSocketAddress.addr = TOS_NODE_ID;
       serverSocketAddress.port = port;
+      fd =  call Transport.socket();
+      if(call Transport.bind(fd, &serverSocketAddress) == SUCCESS)
+      {
+         dbg(TRANSPORT_CHANNEL, "Server binding succesful!\n");
+      }
+      else{
+         dbg(TRANSPORT_CHANNEL, "Server binding failed\n");
+      }
+      if(call Transport.listen(fd) == SUCCESS)
+      {
+         dbg(TRANSPORT_CHANNEL, "Server listening...\n");
+      }
+      else{
+         dbg(TRANSPORT_CHANNEL, "Server state listening failed\n");
+      }
+      
       //need to add timers 
       //need to check if connection is succesful 
    }
@@ -123,7 +137,6 @@ implementation{
       
       // socket_addr_t serverSocketAddress;
       // socket_t fd;
-
       fd =  call Transport.socket();
       clientSocketAddress.addr = TOS_NODE_ID;
       clientSocketAddress.port = srcPort;
@@ -132,7 +145,21 @@ implementation{
 
       //if connection succesful start timer
       dbg(TRANSPORT_CHANNEL, "Creating connection with server %d at port %d\n", dest, destPort);
-      call Transport.connect(fd, &serverSocketAddress);
+      if(call Transport.bind(fd, &clientSocketAddress) == SUCCESS)
+      {
+         dbg(TRANSPORT_CHANNEL, "Client binding succesful!\n");
+      }
+      else{
+         dbg(TRANSPORT_CHANNEL, "Client binding failed\n");
+      }
+      if(call Transport.connect(fd, &serverSocketAddress) == SUCCESS)
+      {
+         dbg(TRANSPORT_CHANNEL, "Server and client connected sucessfully\n");
+      }
+      else
+      {
+         dbg(TRANSPORT_CHANNEL, "Connection failed\n");
+      }
       //need to add timers
    }
 
