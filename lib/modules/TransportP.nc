@@ -6,12 +6,13 @@
 module TransportP{
     provides interface Transport;
     uses interface SimpleSend as TSender;
+    uses interface List<socket_store_t> as sockets;
 }
 implementation{
 
-    command Transport.socket_t socket()
+    command socket_t Transport.socket()
     {
-
+        return 0;
     }
 
     command error_t Transport.bind(socket_t fd, socket_addr_t *addr)

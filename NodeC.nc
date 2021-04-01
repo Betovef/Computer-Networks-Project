@@ -32,6 +32,9 @@ implementation {
     Node.RSender -> FloodingC.RSender;
     // Node.FSender -> FloodingC.FSender;
 
+    components TransportC;
+    Node.Transport->TransportC;
+
     Node -> MainC.Boot;
 
     Node.Receive -> GeneralReceive;

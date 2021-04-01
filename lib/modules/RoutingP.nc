@@ -4,7 +4,7 @@
 #include "../../includes/channels.h"
 #include "../../includes/protocol.h"
 
-#define TABLE_SIZE 8 //change value accordingly -- make dynamic
+#define TABLE_SIZE 20 //change value accordingly -- make dynamic
 #define MAX_TTL 10;
 
 module RoutingP{

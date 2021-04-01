@@ -12,6 +12,7 @@
 #include "includes/CommandMsg.h"
 #include "includes/sendInfo.h"
 #include "includes/channels.h"
+#include "includes/socket.h"
 
 module Node{
    uses interface Boot;
@@ -27,6 +28,7 @@ module Node{
    uses interface Hashmap<Route> as RoutingTable;
    uses interface List<Route> as RouteTable; //not using this -delete later
    uses interface Routing;
+   uses interface Transport;
 }
 
 implementation{
@@ -98,9 +100,41 @@ implementation{
 
    event void CommandHandler.printDistanceVector(){}
 
-   event void CommandHandler.setTestServer(){}
+   socket_addr_t serverSocketAddress;
+   socket_t fd;
+   event void CommandHandler.setTestServer(uint16_t port){
+      dbg(TRANSPORT_CHANNEL, "Initiating server as node %d and binding to port %d\n", TOS_NODE_ID, port);
 
-   event void CommandHandler.setTestClient(){}
+      // socket_addr_t serverSocketAddress;
+      // socket_t fd;
+
+      fd =  call Transport.socket();
+      serverSocketAddress.addr = TOS_NODE_ID;
+      serverSocketAddress.port = port;
+      //need to add timers 
+      //need to check if connection is succesful 
+   }
+   
+   socket_addr_t clientSocketAddress;
+
+   event void CommandHandler.setTestClient(uint16_t dest, uint16_t srcPort, uint16_t destPort, uint16_t transfer){
+      dbg(TRANSPORT_CHANNEL, "Initiating client as node %d and binding to source port %d\n", TOS_NODE_ID, srcPort);
+      
+      
+      // socket_addr_t serverSocketAddress;
+      // socket_t fd;
+
+      fd =  call Transport.socket();
+      clientSocketAddress.addr = TOS_NODE_ID;
+      clientSocketAddress.port = srcPort;
+      serverSocketAddress.addr = dest;
+      serverSocketAddress.port = destPort;
+
+      //if connection succesful start timer
+      dbg(TRANSPORT_CHANNEL, "Creating connection with server %d at port %d\n", dest, destPort);
+      call Transport.connect(fd, &serverSocketAddress);
+      //need to add timers
+   }
 
    event void CommandHandler.setAppServer(){}
 
