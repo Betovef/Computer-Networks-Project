@@ -154,7 +154,7 @@ implementation{
       }
       if(call Transport.connect(fd, &serverSocketAddress) == SUCCESS)
       {
-         dbg(TRANSPORT_CHANNEL, "Server and client connected sucessfully\n");
+         dbg(TRANSPORT_CHANNEL, "Server and client connected successfully\n");
       }
       else
       {

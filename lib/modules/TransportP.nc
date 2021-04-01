@@ -12,11 +12,29 @@ implementation{
 
     command socket_t Transport.socket()
     {
-        return 0;
+        socket_t fd;
+        socket_store_t tempSocket;
+        if(call sockets.size() < MAX_NUM_OF_SOCKETS)
+        {
+            fd = call sockets.size();
+            tempSocket.fd = call sockets.size();
+            call sockets.pushback(tempSocket);
+        }
+        else
+        {
+            dbg(TRANSPORT_CHANNEL, "Unable to allocate socket \n");
+            return NULL;
+        }
+        return fd;
     }
 
     command error_t Transport.bind(socket_t fd, socket_addr_t *addr)
     {
+        socket_store_t tempSocket; 
+        tempSocket = call sockets.get(fd);
+        tempSocket.fd = fd;
+        tempSocket.src = addr->port;
+        tempSocket.state = LISTEN;
 
     }
 
@@ -57,6 +75,9 @@ implementation{
 
     command error_t Transport.listen(socket_t fd)
     {
+        socket_store_t tempSocket;
+        tempSocket = call sockets.get(fd);
+        tempSocket.state = LISTEN;
 
     }
 }
