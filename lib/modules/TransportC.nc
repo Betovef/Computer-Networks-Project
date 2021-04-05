@@ -9,6 +9,6 @@ implementation{
     components new SimpleSendC(AM_PACK);
     TransportP.TSender->SimpleSendC;
 
-    components new ListC(socket_store_t, 10) as SocketsC;
+    components new HashmapC(socket_store_t, 10) as SocketsC;
     TransportP.sockets->SocketsC;
 }

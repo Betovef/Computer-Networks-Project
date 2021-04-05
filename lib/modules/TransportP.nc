@@ -6,7 +6,7 @@
 module TransportP{
     provides interface Transport;
     uses interface SimpleSend as TSender;
-    uses interface List<socket_store_t> as sockets;
+    uses interface Hashmap<socket_store_t> as sockets;
 }
 implementation{
 
@@ -16,9 +16,9 @@ implementation{
         socket_store_t tempSocket;
         if(call sockets.size() < MAX_NUM_OF_SOCKETS)
         {
-            fd = call sockets.size();
-            tempSocket.fd = call sockets.size();
-            call sockets.pushback(tempSocket);
+            fd = call sockets.size()+1;
+            tempSocket.fd = fd;
+            call sockets.insert(fd, tempSocket);
         }
         else
         {
@@ -31,10 +31,21 @@ implementation{
     command error_t Transport.bind(socket_t fd, socket_addr_t *addr)
     {
         socket_store_t tempSocket; 
-        tempSocket = call sockets.get(fd);
-        tempSocket.fd = fd;
-        tempSocket.src = addr->port;
-        tempSocket.state = LISTEN;
+        socket_addr_t tempAddress; 
+        if(call sockets.contains(fd)){
+            tempSocket = call sockets.get(fd);
+            tempAddress.port = addr->port;
+            tempAddress.addr = addr->addr;
+            tempSocket.dest = tempAddress;
+
+            call sockets.remove(fd);
+            call sockets.insert(fd, tempSocket);
+
+            return SUCCESS;
+        }
+        else{
+            return FAIL;
+        }
 
     }
 
@@ -76,8 +87,20 @@ implementation{
     command error_t Transport.listen(socket_t fd)
     {
         socket_store_t tempSocket;
-        tempSocket = call sockets.get(fd);
-        tempSocket.state = LISTEN;
+        enum socket_state tempState;
 
+        if(call sockets.contains(fd)){
+            tempSocket = call sockets.get(fd);
+            tempState = LISTEN;
+            tempSocket.state = tempState;
+
+            call sockets.remove(fd);
+            call sockets.insert(fd, tempSocket);
+            
+            return SUCCESS;
+        }
+        else{
+            return FAIL;
+        }
     }
 }

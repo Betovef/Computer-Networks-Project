@@ -31,7 +31,8 @@ def main():
     s.testServer(1, 10);
     # s.routeDMP(9);
     s.runTime(100);
-    s.testClient(3, 4,   4, 10 , 5);
+    s.testServer(1, 11);
+    # s.testClient(3, 4,   4, 10 , 5);
     # s.routeDMP(7);
     # s.ping(1, 8, "Hello World!\n");
     s.runTime(100);

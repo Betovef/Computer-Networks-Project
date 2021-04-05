@@ -107,9 +107,10 @@ implementation{
 
       // socket_addr_t serverSocketAddress;
       // socket_t fd;
+      fd =  call Transport.socket();
       serverSocketAddress.addr = TOS_NODE_ID;
       serverSocketAddress.port = port;
-      fd =  call Transport.socket();
+      
       if(call Transport.bind(fd, &serverSocketAddress) == SUCCESS)
       {
          dbg(TRANSPORT_CHANNEL, "Server binding succesful!\n");
