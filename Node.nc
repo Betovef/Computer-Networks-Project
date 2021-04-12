@@ -105,8 +105,6 @@ implementation{
    event void CommandHandler.setTestServer(uint16_t port){
       dbg(TRANSPORT_CHANNEL, "Initiating server at node %d and binding it to port %d\n", TOS_NODE_ID, port);
 
-      // socket_addr_t serverSocketAddress;
-      // socket_t fd;
       fd =  call Transport.socket();
       serverSocketAddress.addr = TOS_NODE_ID;
       serverSocketAddress.port = port;
@@ -127,20 +125,19 @@ implementation{
       }
       
       //need to add timers 
-      //need to check if connection is succesful 
    }
    
    socket_addr_t clientSocketAddress;
 
    event void CommandHandler.setTestClient(uint16_t dest, uint16_t srcPort, uint16_t destPort, uint16_t transfer){
-      dbg(TRANSPORT_CHANNEL, "Initiating client as node %d and binding to source port %d\n", TOS_NODE_ID, srcPort);
-      
-      
-      // socket_addr_t serverSocketAddress;
-      // socket_t fd;
+      dbg(TRANSPORT_CHANNEL, "Initiating client at node %d and binding it to port %d\n", TOS_NODE_ID, srcPort);
+
+      // dbg(TRANSPORT_CHANNEL, "Testing client as dest %d srcPort %d destPort %d transfer %d\n", dest, srcPort, destPort, transfer);
       fd =  call Transport.socket();
+      //setting up src info
       clientSocketAddress.addr = TOS_NODE_ID;
       clientSocketAddress.port = srcPort;
+      //setting up dest info
       serverSocketAddress.addr = dest;
       serverSocketAddress.port = destPort;
 

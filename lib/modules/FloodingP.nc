@@ -65,7 +65,7 @@ implementation{
                     call Transport.receive(myMsg);
                 }
                 else{
-                    makePack(&sendPackage, myMsg->src, myMsg->dest, myMsg->TTL-1, PROTOCOL_TCP, seqNum+1, (uint8_t *)myMsg->payload, PACKET_MAX_PAYLOAD_SIZE);
+                    makePack(&sendPackage, myMsg->src, myMsg->dest, myMsg->TTL-1, PROTOCOL_TCP, seqNum+1, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
                     call RSender.send(sendPackage, myMsg->dest);
                 }
                 return msg;

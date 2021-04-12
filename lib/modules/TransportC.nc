@@ -18,4 +18,7 @@ implementation{
 
     components new HashmapC(socket_store_t, 10) as SocketsC;
     TransportP.sockets->SocketsC;
+
+    components new TimerMilliC() as TransportTimer;
+    TransportP.TransportTimer->TransportTimer;
 }
