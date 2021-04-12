@@ -35,7 +35,7 @@ typedef struct socket_store_t{
     uint8_t flag;
     uint8_t fd;
     enum socket_state state;
-    socket_port_t src;
+    socket_addr_t src;
     socket_addr_t dest;
 
     // This is the sender portion.

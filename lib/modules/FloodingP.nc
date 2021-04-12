@@ -3,12 +3,14 @@
 #include "../../includes/channels.h"
 #include "../../includes/protocol.h"
 #include "../../includes/route.h"
+#include "../../includes/tcp.h"
 
 
 module FloodingP{
     provides interface SimpleSend as FSender;
     provides interface SimpleSend as RSender;
     uses interface NeighborDiscovery;
+    uses interface Transport;
 
     //internal interfaces
     uses interface SimpleSend as InternalSender;
@@ -19,6 +21,7 @@ module FloodingP{
 implementation{
     pack sendPackage;
     pack packets;
+    tcp_segment* TCPpack;
     void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
     bool checkPackets(pack *myMsg);
 
@@ -43,17 +46,29 @@ implementation{
       
         if(len == sizeof(pack)){
             pack* myMsg=(pack*) payload;
+            TCPpack = (tcp_segment*)(myMsg->payload);
             //  dbg(GENERAL_CHANNEL, "Node %d received signal from node %d\n",TOS_NODE_ID, myMsg->src);
             if(myMsg->TTL == 0 || checkPackets(myMsg) == TRUE){ //Remember to adjust TTL to the number of nodes 
                 // dbg(GENERAL_CHANNEL, "Node %d already received signal from node %d\n", TOS_NODE_ID, myMsg->src);
                 // dbg(GENERAL_CHANNEL, "Current TTL %d \n", myMsg->TTL);
                 return msg;
             }
-            else if(TOS_NODE_ID == myMsg->dest){
+            else if(TOS_NODE_ID == myMsg->dest && myMsg->protocol != PROTOCOL_TCP){
                     call PacketList.pushback(*myMsg);
                     dbg(GENERAL_CHANNEL, "Pinging... \n"); 
-                    dbg(GENERAL_CHANNEL, "Package Payload: %s\n", myMsg->payload);   
+                    dbg(GENERAL_CHANNEL, "Package Payload: %s\n", myMsg->payload);
                     return msg;
+            }
+            else if(myMsg->protocol == PROTOCOL_TCP){
+                if(TOS_NODE_ID == myMsg->dest){
+                    dbg(TRANSPORT_CHANNEL, "Node %d got packet of type %d\n",TOS_NODE_ID, TCPpack->flags);
+                    call Transport.receive(myMsg);
+                }
+                else{
+                    makePack(&sendPackage, myMsg->src, myMsg->dest, myMsg->TTL-1, PROTOCOL_TCP, seqNum+1, (uint8_t *)myMsg->payload, PACKET_MAX_PAYLOAD_SIZE);
+                    call RSender.send(sendPackage, myMsg->dest);
+                }
+                return msg;
             }
             else if(myMsg->protocol == PROTOCOL_LINKEDLIST){
                 call PacketList.pushback(*myMsg);

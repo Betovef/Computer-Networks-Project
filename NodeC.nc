@@ -23,7 +23,7 @@ implementation {
     
     components NeighborDiscoveryC; 
     Node.NeighborDiscovery -> NeighborDiscoveryC;
-    NeighborDiscoveryC.RouteTableC -> RouteTableC;
+    NeighborDiscoveryC.RouteTableC -> RouteTableC; //not using RouteTable
     NeighborDiscoveryC.RoutingTableC -> HashmapC;
 
 
@@ -34,6 +34,7 @@ implementation {
 
     components TransportC;
     Node.Transport->TransportC;
+    TransportC.RoutingTableC -> HashmapC;
 
     Node -> MainC.Boot;
 

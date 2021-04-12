@@ -15,6 +15,9 @@ implementation{
     components NeighborDiscoveryC;
     FloodingP.NeighborDiscovery -> NeighborDiscoveryC;
 
+    components TransportC;
+    FloodingP.Transport->TransportC;
+
     // components new ListC(pack, 4);
     // FloodingP.NList -> ListC;
 
