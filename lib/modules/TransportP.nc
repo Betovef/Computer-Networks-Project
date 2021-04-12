@@ -22,7 +22,6 @@ implementation{
     event void TransportTimer.fired()
     {
         //need to work on this
-        
     }
 
     command socket_t Transport.socket()
@@ -58,7 +57,8 @@ implementation{
 
             return SUCCESS;
         }
-        else{
+        else
+        {
             return FAIL;
         }
 
@@ -88,11 +88,13 @@ implementation{
         pack sendPackage; //new message packet
 
         //Tree-way handshake
-        if(myMsg->flags == SYN){
+        if(myMsg->flags == SYN)
+        {
             fd = getfd(myMsg->destPort);
             serverSocket = call sockets.get(fd);
             dbg(TRANSPORT_CHANNEL, "SYN Packet Arrived from Node %d for Port %d\n", package->src, myMsg->srcPort);
-            if(serverSocket.state == LISTEN){
+            if(serverSocket.state == LISTEN)
+            {
                 //updating server socket state to SYN_RCVD
                 serverSocket.state = SYN_RCVD;
                 serverSocket.dest.port = myMsg->srcPort;
@@ -115,38 +117,43 @@ implementation{
                 dbg(TRANSPORT_CHANNEL, "Syn Ack Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
                 call RSender.send(sendPackage, serverSocket.dest.addr); 
             }
-            else{
+            else
+            {
                 dbg(TRANSPORT_CHANNEL, "SERVER NOT LISTENING\n");
             }
         }
-        else if(myMsg->flags == SYN_ACK){
-                dbg(TRANSPORT_CHANNEL, "SYN Ack Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort); 
-                fd = getfd(myMsg->destPort);
-                clientSocket = call sockets.get(fd);
 
-                //updating client socket state to ESTABLISHED
-                clientSocket.state = ESTABLISHED;
-                clientSocket.dest.port = myMsg->srcPort;
-                clientSocket.dest.addr = package->src;
-                call sockets.remove(fd);
-                call sockets.insert(fd, clientSocket);
+        else if(myMsg->flags == SYN_ACK)
+        {
+            dbg(TRANSPORT_CHANNEL, "SYN Ack Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort); 
+            fd = getfd(myMsg->destPort);
+            clientSocket = call sockets.get(fd);
 
-                //Setting up the response to server
-                TCPpack = (tcp_segment*)(sendPackage.payload);
-                TCPpack->destPort = clientSocket.dest.port;
-                TCPpack->srcPort = clientSocket.src.port;
+            //updating client socket state to ESTABLISHED
+            clientSocket.state = ESTABLISHED;
+            clientSocket.dest.port = myMsg->srcPort;
+            clientSocket.dest.addr = package->src;
+            call sockets.remove(fd);
+            call sockets.insert(fd, clientSocket);
+
+            //Setting up the response to server
+            TCPpack = (tcp_segment*)(sendPackage.payload);
+            TCPpack->destPort = clientSocket.dest.port;
+            TCPpack->srcPort = clientSocket.src.port;
                 
-                //(Flags = ACK, Ack = y + 1)
-                TCPpack->ACK = myMsg->seq + 1;
-                TCPpack->flags = ACK;
+            //(Flags = ACK, Ack = y + 1)
+            TCPpack->ACK = myMsg->seq + 1;
+            TCPpack->flags = ACK;
 
-                // Client received SYN ACK message sending reply ACK 
-                makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
-                dbg(TRANSPORT_CHANNEL, "Ack Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
-                call RSender.send(sendPackage, clientSocket.dest.addr); 
-                call Transport.accept(fd);
-            }
-        else if(myMsg->flags == ACK){
+            // Client received SYN ACK message sending reply ACK 
+            makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+            dbg(TRANSPORT_CHANNEL, "Ack Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
+            call RSender.send(sendPackage, clientSocket.dest.addr); 
+            call Transport.accept(fd);
+        }
+
+        else if(myMsg->flags == ACK)
+        {
             dbg(TRANSPORT_CHANNEL, "Ack Packet Arrved from Node %d for Port %d \n", package->dest, myMsg->destPort); //FIXME: need to fix ports, they are being updated incorrectly
             fd = getfd(myMsg->destPort);
             serverSocket = call sockets.get(fd);
@@ -183,7 +190,8 @@ implementation{
         TCPpack->seq = 1;
         TCPpack->flags = SYN;
 
-        if(call RoutingTable.contains(addr->addr)){ //check if there is a route to dest (server)
+        if(call RoutingTable.contains(addr->addr)) //check if there is a route to dest (server)
+        { 
             clientSocket.state = SYN_SENT; //update state
             dbg(TRANSPORT_CHANNEL, "Starting Three-Way Handshake\n");
             dbg(TRANSPORT_CHANNEL, "SYN Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
@@ -192,7 +200,8 @@ implementation{
             
             return SUCCESS;
         }
-        else{
+        else
+        {
             return FAIL;
         }
     }
@@ -211,7 +220,8 @@ implementation{
     {
         socket_store_t tempSocket;
 
-        if(call sockets.contains(fd)){ //check if socket exists
+        if(call sockets.contains(fd)) //check if socket exists
+        { 
             tempSocket = call sockets.get(fd);
             tempSocket.state = LISTEN;
 
@@ -220,18 +230,22 @@ implementation{
             
             return SUCCESS;
         }
-        else{
+        else
+        {
             return FAIL;
         }
     }
 
-    socket_t getfd(uint8_t srcPort){
+    socket_t getfd(uint8_t srcPort)
+    {
         socket_store_t tempSocket;
         uint8_t i;
 
-        for(i = 0; i < call sockets.size(); i++){
+        for(i = 0; i < call sockets.size(); i++)
+        {
             tempSocket = call sockets.get(i);
-            if(tempSocket.src.port == srcPort){
+            if(tempSocket.src.port == srcPort)
+            {
                 return i;
             }
         }
