@@ -123,7 +123,6 @@ implementation{
                 dbg(TRANSPORT_CHANNEL, "SERVER NOT LISTENING\n");
             }
         }
-
         else if(myMsg->flags == SYN_ACK)
         {
             dbg(TRANSPORT_CHANNEL, "SYN Ack Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort); 
@@ -151,18 +150,9 @@ implementation{
             dbg(TRANSPORT_CHANNEL, "Ack Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
             call RSender.send(sendPackage, clientSocket.dest.addr); 
             call Transport.accept(fd);
+            // dbg(TRANSPORT_CHANNEL, "Client ready to write DATA starting STOP AND WAIT PROTOCOL\n");
+            // call Transport.write(fd, uint8_t *buff, uint16_t bufflen)
         }
-
-                // Client received SYN ACK message sending reply ACK 
-                makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
-                dbg(TRANSPORT_CHANNEL, "Ack Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
-                call RSender.send(sendPackage, clientSocket.dest.addr); 
-                call Transport.accept(fd);
-                // dbg(TRANSPORT_CHANNEL, "Client ready to write DATA starting STOP AND WAIT PROTOCOL\n");
-                // call Transport.write(fd, uint8_t *buff, uint16_t bufflen)
-            }
-        else if(myMsg->flags == ACK){
-            dbg(TRANSPORT_CHANNEL, "Ack Packet Arrved from Node %d for Port %d \n", package->dest, myMsg->destPort); 
         else if(myMsg->flags == ACK)
         {
             dbg(TRANSPORT_CHANNEL, "Ack Packet Arrved from Node %d for Port %d \n", package->dest, myMsg->destPort); //FIXME: need to fix ports, they are being updated incorrectly
