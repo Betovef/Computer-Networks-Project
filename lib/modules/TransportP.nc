@@ -69,7 +69,7 @@ implementation{
         pack sendPackage;
         socket_store_t tempSocket = call sockets.get(fd);
 
-        dbg(TRANSPORT_CHANNEL, "Hello world from accept\n");
+        // dbg(TRANSPORT_CHANNEL, "Hello world from accept\n");
     }
 
     command uint16_t Transport.write(socket_t fd, uint8_t *buff, uint16_t bufflen)
@@ -82,6 +82,7 @@ implementation{
         tcp_segment* myMsg = (tcp_segment*)(package->payload); //unload payload
         socket_store_t serverSocket;
         socket_store_t clientSocket;
+        socket_store_t tempSocket;
         socket_t fd;
 
         tcp_segment* TCPpack; //new payload
@@ -145,9 +146,11 @@ implementation{
                 dbg(TRANSPORT_CHANNEL, "Ack Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
                 call RSender.send(sendPackage, clientSocket.dest.addr); 
                 call Transport.accept(fd);
+                // dbg(TRANSPORT_CHANNEL, "Client ready to write DATA starting STOP AND WAIT PROTOCOL\n");
+                // call Transport.write(fd, uint8_t *buff, uint16_t bufflen)
             }
         else if(myMsg->flags == ACK){
-            dbg(TRANSPORT_CHANNEL, "Ack Packet Arrved from Node %d for Port %d \n", package->dest, myMsg->destPort); //FIXME: need to fix ports, they are being updated incorrectly
+            dbg(TRANSPORT_CHANNEL, "Ack Packet Arrved from Node %d for Port %d \n", package->dest, myMsg->destPort); 
             fd = getfd(myMsg->destPort);
             serverSocket = call sockets.get(fd);
 
@@ -158,7 +161,48 @@ implementation{
             call sockets.remove(fd);
             call sockets.insert(fd, serverSocket);
             dbg(TRANSPORT_CHANNEL, "Connection Client/Server has been ESTABLISHED\n");
+            dbg(TRANSPORT_CHANNEL, "Server ready to read DATA\n");
+            
         }
+        else if(myMsg->flags == FIN)//TERMINATION CLOSING CONNECTION
+        {
+            fd = getfd(myMsg->destPort);
+            tempSocket = call sockets.get(fd);
+
+            dbg(TRANSPORT_CHANNEL, "FIN Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort);
+
+            //updating side to CLOSED
+            tempSocket.state = CLOSED;
+            tempSocket.dest.port = myMsg->srcPort;
+            tempSocket.dest.addr = package->src;
+
+            TCPpack = (tcp_segment*)(sendPackage.payload);
+            TCPpack->destPort = tempSocket.dest.port;
+            TCPpack->srcPort = tempSocket.src.port;
+            TCPpack->seq = 1;
+            TCPpack->ACK = myMsg->seq + 1;
+            TCPpack->flags = FIN_ACK;
+            call sockets.remove(fd);
+            call sockets.insert(fd, tempSocket);
+
+            makePack(&sendPackage, TOS_NODE_ID, tempSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+            dbg(TRANSPORT_CHANNEL, "FIN ACK Packet Sent to Node %d for Port %d \n", tempSocket.dest.addr, tempSocket.dest.port);
+
+        }
+        else if(myMsg->flags == FIN_ACK)
+        {
+            dbg(TRANSPORT_CHANNEL, "FIN ACK Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort);
+
+            fd = getfd(myMsg->destPort);
+            tempSocket = call sockets.get(fd);
+
+            tempSocket.state = CLOSED;
+            dbg(TRANSPORT_CHANNEL, "Connection Client/Server has been CLOSED\n");
+
+        } 
+
+        
+        
 
     }
 

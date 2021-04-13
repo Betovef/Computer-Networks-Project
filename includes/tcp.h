@@ -8,11 +8,12 @@ enum{
     RESET,
     PUSH,
     URG,
-    ACK
+    ACK,
+    FIN_ACK
 };
 
 enum{
-    TCP_MAX_PAYLOAD_SIZE = 12
+    TCP_MAX_PAYLOAD_SIZE = 28
 };
 
 typedef nx_struct tcp_segment{
