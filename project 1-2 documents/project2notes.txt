@@ -1,0 +1,33 @@
+//Split Horizon implementation 
+    /*
+    Prevents routing loops in protocol by preventing a router from broadcasting a route back onto the interface from which it was learned.
+    Example: if a-b-c and a sends to c, a does not have to advertise its route for c back to b
+    */
+
+//Poison Reverse technique implementation
+    /*
+    Prevents router from sending packets through a route that has become invalid
+    If an invalid/unreachable route is detected, all other routers are informed that the bad route has a inf route metric (make it very long or infinite)
+    */
+
+
+//Periodic timer for updating the routing table
+
+    //create struct(or header file) to store DVR information
+
+    //RIP implementation (route advertising and merging routes)
+
+    //Split Horizon implementation 
+
+    //Poison Reverse technique implementation
+
+    // Print Routing Table function
+
+    /*
+    Outputs:
+    DEBUG(1): Routing Packet -src: 3, dest: 10, seq: 0, next hop: 2, cost: 26
+    DEBUG (3): Routing Table:
+    DEBUG (3): Dest  Hop  Count
+    DEBUG (3): 6  6  1
+    */
+

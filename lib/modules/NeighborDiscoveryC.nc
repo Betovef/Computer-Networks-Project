@@ -20,7 +20,7 @@ implementation{
     NeighborDiscoveryP.PacketList-> PacketListC;
 
     components new ListC(uint16_t, NEIGHBORHOOD_SIZE) as NeighborListC;
-    NeighborDiscoveryP.NeighborList->NeighborListC; //Uncoment
+    NeighborDiscoveryP.NeighborList->NeighborListC; 
 
     components RoutingC;
     RoutingC.NeighborListC -> NeighborListC;

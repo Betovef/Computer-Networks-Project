@@ -1,0 +1,16 @@
+1) What are the pros and cons of using distance vector routing compared to link state routing?
+	Distance vector routing is typically easier to configure and maintain than link state routing. Distance vector routing, however, is slower to converge, risks the count-to-infinity problem, creates more traffic, and leads to larger routing tables compared to link state routing.
+	
+2) Does your routing algorithm produce symmetric routes (that follow the same path from X to Y in reverse when going from Y to X)? Why or why not?
+	The routing algorithm produces symmetric routes since...
+	The routing algorithm does not produce symmetric routes since...
+	
+3) What if a node advertised itself as having a route to some nodes, but never forwards packets to those nodes? Is there anything you can do in your implementation to deal with this case?
+	If a node advertised itself as having a route but never forwards packets to those nodes, 
+	
+4) What happens if a distance vector packet is lost or corrupted?
+	If a distance vector packet is lost or corrupted, (something about blocking off a route or etc)
+	
+5) What would happen if a node alternated between advertising and withdrawing a route to a node every few milliseconds? How might you modify your implementation to deal with this case?
+	If a node alternated between advertising and withdrawing a route to a node every fow milliseconds then 
+	To deal with this case...

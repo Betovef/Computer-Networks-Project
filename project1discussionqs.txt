@@ -1,7 +1,0 @@
-1 Event driven programming allows us to identify what is an event and event behaviors. A con is that event errors can be hard to diagnose.
-2 The benefit of having both flooding and a TTL field is that they solve each other's problems. If we had only flooding checks packets can circulate indefinetly like the question states and only a TTL field would result in messages not being sent properly between nodes.
-3 In a best case scenario, the number of packets sent/recieved would be twice the number of nodes and will happen if the nodes are connected in a straight line (they can only go in two directions.
-In a worst case scenario, the number of packets would be n-1 if every node was connected to every other node (like 1 and 3). 
-4 A better way to accomplish multi-hop communication is to have nodes send packets directly to each neighbor rather than to a broadcast channel. This avoids additional broadcasting and collision.  
-5 Refer to project 2 extra credit.
-
