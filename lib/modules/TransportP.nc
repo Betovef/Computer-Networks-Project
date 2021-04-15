@@ -74,32 +74,34 @@ implementation{
 
     command socket_t Transport.accept(socket_t fd)
     {
-        bool check = FALSE;
+        //bool check = FALSE;
         uint8_t i  = 0;
         socket_t tempFd;
-        for(i = 0; i< call acceptList.size(); i++)
+        for(i = 0; i < call acceptList.size(); i++)
         {
             tempFd = call acceptList.get(i);
             if(tempFd == fd){
-                check = TRUE;
-                break;
+                //check = TRUE;
+                //break;
+                return fd;
             }
         }
-
+    /*
         if(check == TRUE)
         {
             return fd;
         }
         else{
-            return NULL;
-        }
+            */
+        return NULL;
+        //}
     }
 
     command uint16_t Transport.write(socket_t fd, uint8_t *buff, uint16_t bufflen)
     {
         pack sendPackage;
         socket_store_t clientSocket;
-        uint16_t dataNotWritten;
+        //uint16_t dataNotWritten;
         uint8_t i = 0;
         uint16_t temp = 0;
 

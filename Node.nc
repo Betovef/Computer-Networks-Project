@@ -136,8 +136,8 @@ implementation{
    event void serverTimer.fired()
    {
       socket_t newFd = call Transport.accept(fd);
-      uint8_t i = 0;
       socket_t readFd;
+      uint8_t i = 0;
       uint16_t dataRead = 0;
       uint8_t readBuff[SOCKET_BUFFER_SIZE];
 
@@ -196,8 +196,8 @@ implementation{
    event void clientTimer.fired()
     {
       uint16_t i = 0;
-      uint8_t writeBuff[transferGlobal];
       uint16_t dataWritten = 0;
+      uint8_t writeBuff[transferGlobal];
 
       if(transferGlobal != NULL)
       {
