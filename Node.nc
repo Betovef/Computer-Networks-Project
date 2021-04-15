@@ -29,6 +29,9 @@ module Node{
    uses interface List<Route> as RouteTable; //not using this -delete later
    uses interface Routing;
    uses interface Transport;
+   uses interface Timer<TMilli> as clientTimer;
+   uses interface Timer<TMilli> as serverTimer;
+   uses interface List<socket_t> as acceptedSockets;
 }
 
 implementation{
@@ -126,10 +129,36 @@ implementation{
          dbg(TRANSPORT_CHANNEL, "Server state listening failed\n");
       }
       
+      call serverTimer.startPeriodic(10000);
       //need to add timers 
+   }
+
+   event void serverTimer.fired()
+   {
+      socket_t newFd = call Transport.accept(fd);
+      uint8_t i = 0;
+      socket_t readFd;
+      uint16_t dataRead = 0;
+      uint8_t readBuff[SOCKET_BUFFER_SIZE];
+
+      if(newFd != NULL)
+      {
+         call acceptedSockets.pushback(newFd);
+      }
+      else
+      {
+         // dbg(TRANSPORT_CHANNEL, "NOTHING TO READ\n");
+      }
+
+      for(i = 0; i < call acceptedSockets.size(); i++)
+      {
+         readFd = call acceptedSockets.get(i);
+         dataRead = call Transport.read(readFd, readBuff, SOCKET_BUFFER_SIZE);
+      }
    }
    
    socket_addr_t clientSocketAddress;
+   uint16_t transferGlobal;
 
    event void CommandHandler.setTestClient(uint16_t dest, uint16_t srcPort, uint16_t destPort, uint16_t transfer){
       dbg(TRANSPORT_CHANNEL, "Initiating client at node %d and binding it to port %d\n", TOS_NODE_ID, srcPort);
@@ -160,8 +189,36 @@ implementation{
       {
          dbg(TRANSPORT_CHANNEL, "Connection failed\n");
       }
-      //need to add timers
+      call clientTimer.startPeriodic(20000); //periodically write buffer
+      transferGlobal = transfer; 
    }
+
+   event void clientTimer.fired()
+    {
+      uint16_t i = 0;
+      uint8_t writeBuff[transferGlobal];
+      uint16_t dataWritten = 0;
+
+      if(transferGlobal != NULL)
+      {
+         for(i = 0; i < transferGlobal; i++)
+         {
+            writeBuff[i] = i+1;
+         }
+         dataWritten = call Transport.write(fd, writeBuff, transferGlobal);
+         call Transport.sendBuffer(fd);
+      }
+      dbg(TRANSPORT_CHANNEL, "Data written so far %d \n", dataWritten);
+      if(transferGlobal - dataWritten == 0)
+      {
+         call clientTimer.stop();
+         dbg(TRANSPORT_CHANNEL, "DATA WRITING STOPPED!!!\n");
+      }
+      else
+      {
+         transferGlobal = transferGlobal - dataWritten;
+      }
+    }
 
    event void CommandHandler.setAppServer(){}
 

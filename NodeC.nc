@@ -55,11 +55,20 @@ implementation {
     components new ListC(Route, NEIGHBORHOOD_SIZE) as RouteTableC;
     Node.RouteTable -> RouteTableC;
 
+    components new ListC(socket_t, 255) as acceptedSockets;
+    Node.acceptedSockets -> acceptedSockets;
+
     components RoutingC;
     Node.Routing -> RoutingC;
     RoutingC.RouteTableC -> RouteTableC; //not using this -delete later
     RoutingC.HashmapC -> HashmapC;
     FloodingC.HashmapC -> HashmapC;
+
+    components new TimerMilliC() as clientTimer;
+    Node.clientTimer->clientTimer;
+
+    components new TimerMilliC() as serverTimer;
+    Node.serverTimer->serverTimer;
 
 
     
