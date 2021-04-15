@@ -9,7 +9,9 @@ enum{
     PUSH,
     URG,
     ACK,
-    FIN_ACK
+    FIN_ACK,
+    DATA,
+    DATA_ACK
 };
 
 enum{

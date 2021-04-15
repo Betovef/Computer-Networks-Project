@@ -21,4 +21,10 @@ implementation{
 
     components new TimerMilliC() as TransportTimer;
     TransportP.TransportTimer->TransportTimer;
+
+    components new ListC(socket_t, 255) as acceptList;
+    TransportP.acceptList -> acceptList;
+
+    // components new TimerMilliC() as clientTimer;
+    // TransportP.clientTimer->clientTimer;
 }

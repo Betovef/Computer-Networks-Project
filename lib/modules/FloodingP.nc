@@ -38,7 +38,7 @@ implementation{
         Route route;
         route = call RoutingTable.get(dest);
 
-        dbg(ROUTING_CHANNEL, "Routing Packet -src: %d, dest: %d, seq: %d, next hop: %d, cost: %d\n", TOS_NODE_ID, dest, msg.seq, route.nextHop, route.cost);
+        // dbg(ROUTING_CHANNEL, "Routing Packet -src: %d, dest: %d, seq: %d, next hop: %d, cost: %d\n", TOS_NODE_ID, dest, msg.seq, route.nextHop, route.cost); //uncomment for project 2
         msg.seq++;
         call InternalSender.send(msg, route.nextHop);
     }
@@ -69,7 +69,7 @@ implementation{
             {
                 if(TOS_NODE_ID == myMsg->dest)
                 {
-                    dbg(TRANSPORT_CHANNEL, "Node %d got packet of type %d\n",TOS_NODE_ID, TCPpack->flags);
+                    // dbg(TRANSPORT_CHANNEL, "Node %d got packet of type %d\n",TOS_NODE_ID, TCPpack->flags);
                     call Transport.receive(myMsg);
                 }
                 else
