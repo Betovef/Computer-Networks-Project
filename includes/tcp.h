@@ -26,7 +26,7 @@ typedef nx_struct tcp_segment{
     nx_uint8_t flags;
 
     nx_uint8_t lastACK;
-    nx_uint8_t window;
+    nx_uint8_t advWindow;
     nx_uint8_t data[TCP_MAX_PAYLOAD_SIZE];
 
 }tcp_segment;

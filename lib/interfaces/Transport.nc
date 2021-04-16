@@ -146,4 +146,6 @@ interface Transport{
    command error_t listen(socket_t fd);
 
    command error_t sendBuffer(uint8_t fd);
+
+   command error_t checkConnection(uint8_t fd);
 }
