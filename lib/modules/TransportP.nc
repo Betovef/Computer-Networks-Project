@@ -99,11 +99,10 @@ implementation{
         {
             tempFd = call acceptList.get(i); //if socket is already accepted return null
             if(tempFd == fd){
-                return NULL;
+                return fd;
             }
         }
-        call acceptList.pushback(fd); //if has not been accepted add to list and return fd
-        return fd;
+        return NULL;
     }
 
     command uint16_t Transport.write(socket_t fd, uint8_t *buff, uint16_t bufflen)
@@ -170,7 +169,10 @@ implementation{
         socket_store_t clientSocket;
         socket_store_t tempSocket;
         socket_t fd;
-        uint8_t i;
+        uint16_t i;
+        uint8_t bufflen = TCP_MAX_PAYLOAD_SIZE;
+        uint8_t msgBuff[TCP_MAX_PAYLOAD_SIZE];
+
 
         tcp_segment* TCPpack; //new payload
         pack sendPackage; //new message packet
@@ -210,6 +212,7 @@ implementation{
                 else
                 {
                     dbg(TRANSPORT_CHANNEL, "SERVER NOT LISTENING\n");
+                    //may be add retransmission ??
                 }
             }
             else if(myMsg->flags == SYN_ACK)
@@ -361,10 +364,11 @@ implementation{
 
         socket_store_t clientSocket = call sockets.get(fd);
         TCPpack = (tcp_segment*)(sendPackage.payload);
-        clientSocket.dest.port = addr->port; //this??????
+        clientSocket.dest.port = addr->port;
         clientSocket.dest.addr = addr->addr;
         TCPpack->destPort = clientSocket.dest.port;
         TCPpack->srcPort = clientSocket.src.port;
+
         //(Flags = SYN, SequenceNum = x) NOTE: sequence number should be random
         TCPpack->ACK = 0;
         TCPpack->seq = 1;
