@@ -166,7 +166,7 @@ implementation{
         tcp_segment* TCPpack; //new payload
         pack sendPackage; //new message packet
 
-        //Tree-way handshake
+        //Three-way handshake
         if(myMsg->flags == SYN)
         {
             fd = getfd(myMsg->destPort);
