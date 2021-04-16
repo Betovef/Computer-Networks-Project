@@ -145,16 +145,18 @@ implementation{
       {
          call acceptedSockets.pushback(newFd);
       }
-      else
+      if(call Transport.checkConnection(fd) == SUCCESS)
       {
-         // dbg(TRANSPORT_CHANNEL, "NOTHING TO READ\n");
+         for(i = 0; i < SOCKET_BUFFER_SIZE; i++){ //prepare buffer
+            readBuff[i] = 0;
+         }
+
+         for(i = 0; i < call acceptedSockets.size(); i++){ //get accepted sockets, read, and print
+            readFd = call acceptedSockets.get(i);
+            dataRead = call Transport.read(readFd, readBuff, SOCKET_BUFFER_SIZE);
+         }
       }
 
-      for(i = 0; i < call acceptedSockets.size(); i++)
-      {
-         readFd = call acceptedSockets.get(i);
-         dataRead = call Transport.read(readFd, readBuff, SOCKET_BUFFER_SIZE);
-      }
    }
    
    socket_addr_t clientSocketAddress;
@@ -184,24 +186,24 @@ implementation{
       if(call Transport.connect(fd, &serverSocketAddress) == SUCCESS)
       {
          dbg(TRANSPORT_CHANNEL, "Server and client connection started successfully...\n");
+         call clientTimer.startPeriodic(20000); //periodically write buffer
+         transferGlobal = transfer;
       }
       else
       {
          dbg(TRANSPORT_CHANNEL, "Connection failed\n");
       }
-      call clientTimer.startPeriodic(20000); //periodically write buffer
-      transferGlobal = transfer; 
    }
 
    event void clientTimer.fired()
     {
-      uint16_t i = 0;
+      uint16_t i = 0; 
       uint16_t dataWritten = 0;
       uint8_t writeBuff[transferGlobal];
 
       if(transferGlobal != NULL)
       {
-         for(i = 0; i < transferGlobal; i++)
+         for(i = 0; i < transferGlobal; i++) // sending 16 bit unsigned integers from 0 to transfer
          {
             writeBuff[i] = i+1;
          }
