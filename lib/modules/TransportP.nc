@@ -381,7 +381,45 @@ implementation{
 
     command error_t Transport.close(socket_t fd)
     {
+        //start here
+        /*
+        send out remaining data and a FIN packet
+        Wait until recieve remaining ACK - Become FIN_WAIT_2
+        One recieving a FIN from other node, become TIME_WAIT
+        Until it becomes CLOSED
+        If both nodes close:
+            FIN is sent
+            Once ACK+FIN is received, same process
+        */
+        /*
+        FIN_WAIT_2
+        TIME_WAIT
+        CLOSED
+        */
+        /*
+        socket_store_t serverSocket;
+        socket_store_t clientSocket;
+        socket_store_t tempSocket;
+        uint16_t i;
+        pack sendPackage;
 
+        tempSocket = call sockets.get(fd);
+        tempSocket.dest.port = myMsg->srcPort;
+        tempSocket.dest.addr = package->src;
+
+        TCPpack = (tcp_segment*)(sendPackage.payload);
+        TCPpack->destPort = tempSocket.dest.port;
+        TCPpack->srcPort = tempSocket.src.port;
+        TCPpack->seq = 1;
+        TCPpack->ACK = myMsg->seq + 1;
+        TCPpack -> flags = FIN;
+
+        makePack(&sendPackage, TOS_NODE_ID, tempSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+        call RSender.send(sendPackage, addr->addr);
+        if (myMsg -> flags ==FIN_ACK){}
+        */
+        dbg(TRANSPORT_CHANNEL, "Starting Teardown\n");
+        dbg(TRANSPORT_CHANNEL, "Connection Terminated\n");
     }
 
     command error_t Transport.release(socket_t fd)
