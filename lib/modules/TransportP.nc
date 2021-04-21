@@ -153,9 +153,13 @@ implementation{
         tcp_segment* TCPpack; //new payload
         pack sendPackage; //new message packet
 
-        if(myMsg->flags == SYN || myMsg->flags == SYN_ACK || myMsg->flags == ACK){
-                //Tree-way handshake
-            if(myMsg->flags == SYN)
+        //Three-way handshake
+        if(myMsg->flags == SYN)
+        {
+            fd = getfd(myMsg->destPort);
+            serverSocket = call sockets.get(fd);
+            dbg(TRANSPORT_CHANNEL, "SYN Packet Arrived from Node %d for Port %d\n", package->src, myMsg->srcPort);
+            if(serverSocket.state == LISTEN)
             {
                 fd = getfd(myMsg->destPort);
                 serverSocket = call sockets.get(fd);
