@@ -78,7 +78,7 @@ implementation{
             tempSocket.src.port = addr->port;
             tempSocket.src.addr = addr->addr;
 
-            call sockets.remove(fd);
+            
             call sockets.insert(fd, tempSocket);
 
             return SUCCESS;
@@ -109,56 +109,35 @@ implementation{
     {
         pack sendPackage;
         socket_store_t clientSocket;
-        //uint16_t dataNotWritten;
-        uint8_t i = 0;
+        uint16_t count = 0;
+        uint16_t i = 0;
         uint16_t temp = 0;
+        
+        dbg(TRANSPORT_CHANNEL, "Writing data from fd %d..\n", fd);
 
         if(call sockets.contains(fd))
         {
             clientSocket = call sockets.get(fd);
+            dbg(TRANSPORT_CHANNEL, "WHAT IS GOIGN ON in here %d\n", clientSocket.dest.addr);
         }
         else{
             dbg(TRANSPORT_CHANNEL, "ERROR: socket list does not contain fd \n");
             return NULL;
         }
 
-        dbg(TRANSPORT_CHANNEL, "Writing data...\n");
+        // dbg(TRANSPORT_CHANNEL, "WHAT IS GOIGN ON %d\n", clientSocket.effectiveWindow);
 
-        // for(i = 0; i < bufflen; i++) 
-        // {
-        //     temp = buff[i];
-        //     dbg(TRANSPORT_CHANNEL, "Writing %d in buffer\n", temp);
-        // }
-
-        for(i = 0; i< clientSocket.effectiveWindow; i++)
-        {
+        while(i < TCP_MAX_PAYLOAD_SIZE && i < clientSocket.effectiveWindow){
             clientSocket.sendBuff[i] = buff[i];
             clientSocket.lastWritten = buff[i];
+            dbg(TRANSPORT_CHANNEL, " Writing %d\n", clientSocket.sendBuff[i]);
+            i++;
         }
 
-        call sockets.remove(fd);
+        
         call sockets.insert(fd, clientSocket);
 
-        temp = clientSocket.effectiveWindow;
-
-        return temp;
-
-
-        // if(clientSocket.lastAck <= clientSocket.lastWritten)
-        // {
-        //     dataNotWritten = SOCKET_BUFFER_SIZE - (clientSocket.lastAck + clientSocket.lastWritten);
-        // }
-        // else
-        // {
-        //    dbg(TRANSPORT_CHANNEL, "data ack is ahead of data written???\n");
-        // }
-        // if(dataNotWritten <= bufflen)
-        // {
-        //     dbg(TRANSPORT_CHANNEL, "Need more space to write\n");
-        // }
-        // else
-        // {
-        // }
+        return (i+1);
 
     }
 
@@ -170,9 +149,6 @@ implementation{
         socket_store_t tempSocket;
         socket_t fd;
         uint16_t i;
-        uint8_t bufflen = TCP_MAX_PAYLOAD_SIZE;
-        uint8_t msgBuff[TCP_MAX_PAYLOAD_SIZE];
-
 
         tcp_segment* TCPpack; //new payload
         pack sendPackage; //new message packet
@@ -190,7 +166,8 @@ implementation{
                     serverSocket.state = SYN_RCVD;
                     serverSocket.dest.port = myMsg->srcPort;
                     serverSocket.dest.addr = package->src;
-                    call sockets.remove(fd);
+                    serverSocket.effectiveWindow = 5;
+                    
                     call sockets.insert(fd, serverSocket);
 
                     //Setting up the response to client 
@@ -202,7 +179,7 @@ implementation{
                     TCPpack->seq = 1; // FIXME: need to give random number
                     TCPpack->ACK = myMsg->seq + 1;
                     TCPpack->flags = SYN_ACK;
-                    TCPpack->advWindow = SOCKET_BUFFER_SIZE;
+                    TCPpack->advWindow = serverSocket.effectiveWindow; //avertise window to 5
                     
                     // Server received SYN message sending reply SYN+ACK 
                     makePack(&sendPackage, TOS_NODE_ID, serverSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
@@ -225,9 +202,9 @@ implementation{
                 clientSocket.state = ESTABLISHED;
                 clientSocket.dest.port = myMsg->srcPort;
                 clientSocket.dest.addr = package->src;
-
+                // dbg(TRANSPORT_CHANNEL, "The effective window for the client end is %d \n", myMsg->advWindow);
                 clientSocket.effectiveWindow = myMsg->advWindow;
-                call sockets.remove(fd);
+                
                 call sockets.insert(fd, clientSocket);
 
                 //Setting up the response to server
@@ -238,20 +215,18 @@ implementation{
                 //(Flags = ACK, Ack = y + 1)
                 TCPpack->ACK = myMsg->seq + 1;
                 TCPpack->flags = ACK;
-                TCPpack->advWindow = SOCKET_BUFFER_SIZE;
 
                 // Client received SYN ACK message sending reply ACK 
                 makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
                 dbg(TRANSPORT_CHANNEL, "Ack Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
                 call RSender.send(sendPackage, clientSocket.dest.addr); 
+                call acceptList.pushback(fd);
                 // call clientTimer.startOneShot(15000);
-                // call Transport.accept(fd);
                 // dbg(TRANSPORT_CHANNEL, "Client ready to write DATA starting STOP AND WAIT PROTOCOL\n");
-                // call Transport.write(fd, uint8_t *buff, uint16_t bufflen)
             }
             else if(myMsg->flags == ACK)
             {
-                dbg(TRANSPORT_CHANNEL, "Ack Packet Arrved from Node %d for Port %d \n", package->dest, myMsg->destPort); 
+                dbg(TRANSPORT_CHANNEL, "Ack Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort); 
                 fd = getfd(myMsg->destPort);
                 serverSocket = call sockets.get(fd);
 
@@ -259,35 +234,48 @@ implementation{
                 serverSocket.state = ESTABLISHED;
                 serverSocket.dest.port = myMsg->srcPort;
                 serverSocket.dest.addr = package->src;
-                serverSocket.effectiveWindow = myMsg->advWindow;
-                call sockets.remove(fd);
-                call sockets.insert(fd, serverSocket);
-                dbg(TRANSPORT_CHANNEL, "Connection Client/Server has been ESTABLISHED\n");
-                call acceptList.pushback(fd);
-                // dbg(TRANSPORT_CHANNEL, "Server ready to read DATA\n");
+
                 
+                call sockets.insert(fd, serverSocket);
+
+                dbg(TRANSPORT_CHANNEL, "Connection Client/Server has been ESTABLISHED\n");
+                call acceptList.pushback(fd);  
             }
         }
         else if(myMsg->flags == DATA || myMsg->flags == DATA_ACK){
             //DATA TRANSPORT CONTROL
             if(myMsg->flags == DATA)
             {
-                dbg(TRANSPORT_CHANNEL, "Server received data packet \n");
+                dbg(TRANSPORT_CHANNEL, "Data Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort);
                 fd = getfd(myMsg->destPort);
                 serverSocket = call sockets.get(fd);
 
-                
-                for(i = 0; i < 5; i++)
-                {
+                for(i = 0; i < serverSocket.effectiveWindow; i++){
                     serverSocket.rcvdBuff[i] = myMsg->data[i];
+                    serverSocket.lastRcvd = myMsg->data[i];
+                    // dbg(TRANSPORT_CHANNEL, "writing rcvdBuff %d \n ", serverSocket.rcvdBuff[i]);
                 }
 
-                call sockets.remove(fd);
+                
                 call sockets.insert(fd, serverSocket);
 
             }
             else if(myMsg->flags == DATA_ACK)
             {
+                dbg(TRANSPORT_CHANNEL, "Data Ack Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort);
+                fd = getfd(myMsg->destPort);
+                clientSocket = call sockets.get(fd);
+
+                clientSocket.lastAck = myMsg->ACK;
+                clientSocket.effectiveWindow = myMsg->advWindow;
+
+                dbg(TRANSPORT_CHANNEL, "Client destination IS %d \n", clientSocket.dest.addr);
+                dbg(TRANSPORT_CHANNEL, "LAST INTEGER IS %d \n", clientSocket.lastSent);
+                dbg(TRANSPORT_CHANNEL, "Client lastAck is %d\n", clientSocket.lastAck);
+                dbg(TRANSPORT_CHANNEL, "Client effective window  is %d\n", clientSocket.effectiveWindow);
+
+                
+                call sockets.insert(fd, clientSocket);
 
             }
         }
@@ -311,7 +299,7 @@ implementation{
                 TCPpack->seq = 1;
                 TCPpack->ACK = myMsg->seq + 1;
                 TCPpack->flags = FIN_ACK;
-                call sockets.remove(fd);
+                
                 call sockets.insert(fd, tempSocket);
 
                 makePack(&sendPackage, TOS_NODE_ID, tempSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
@@ -328,11 +316,7 @@ implementation{
                 tempSocket.state = CLOSED;
                 dbg(TRANSPORT_CHANNEL, "Connection Client/Server has been CLOSED\n");
             } 
-        }
-        
-        
-
-        
+        }    
     }
 
     command uint16_t Transport.read(socket_t fd, uint8_t *buff, uint16_t bufflen)
@@ -349,12 +333,12 @@ implementation{
         for(i = 0; i <5; i++)
         {
             temp = serverSocket.rcvdBuff[i];
+
             dbg(TRANSPORT_CHANNEL, "Read %d in server buffer\n", temp);
         }
 
-        return 5;
+        return (i+1);
 
-        // for(i = 0; )
     }
 
     command error_t Transport.connect(socket_t fd, socket_addr_t * addr)
@@ -410,7 +394,7 @@ implementation{
             tempSocket = call sockets.get(fd);
             tempSocket.state = LISTEN;
 
-            call sockets.remove(fd);
+            
             call sockets.insert(fd, tempSocket);
             
             return SUCCESS;
@@ -438,38 +422,93 @@ implementation{
 
     command error_t Transport.sendBuffer(uint8_t fd)
     {
-        socket_store_t tempSocket;
+        socket_store_t clientSocket;
         tcp_segment* TCPpack;
         pack sendPackage;
-        uint8_t i = 0;
+        uint16_t i = 0;
+
+        clientSocket = call sockets.get(fd);
+        TCPpack = (tcp_segment*)(sendPackage.payload);
+        TCPpack->destPort = clientSocket.dest.port;
+        TCPpack->srcPort = clientSocket.src.port;
+        TCPpack->flags = DATA;
 
         // TCPpack = (tcp_segment*)(sendPackage.payload);
         if(call sockets.contains(fd)){
 
-            tempSocket = call sockets.get(fd);
-            TCPpack = (tcp_segment*)(sendPackage.payload);
-            TCPpack->destPort = tempSocket.dest.port;
-            TCPpack->srcPort = tempSocket.src.port;
+            dbg(TRANSPORT_CHANNEL, "WHAT IS GOIGN ON %d == %d \n", clientSocket.lastAck, clientSocket.lastSent);
+            if(clientSocket.sendBuff[0] == 1){
+                TCPpack->seq = 0;
+                TCPpack->ACK = 1;
+                TCPpack->flags = DATA;
 
-            for(i = 0; i < 5; i++)
-            {
-                TCPpack->data[i] = tempSocket.sendBuff[i];
-                // dbg(TRANSPORT_CHANNEL, "Transfer data %d\n", TCPpack->data[i]);
+                for(i = 0; i < clientSocket.effectiveWindow; i++){
+                    TCPpack->data[i] = clientSocket.sendBuff[i];
+                    clientSocket.lastSent = TCPpack->data[i];
+                }
+                dbg(TRANSPORT_CHANNEL, "Last integer sent is %d \n", clientSocket.lastSent);
+                
+                call sockets.insert(fd, clientSocket);
+
+                makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+                call RSender.send(sendPackage, clientSocket.dest.addr);
+                return SUCCESS;
             }
-            // TCPpack->data = tempSocket.sendBuff;
-            
-            TCPpack->ACK = 0;
-            TCPpack->seq = 1;
-            TCPpack->flags = DATA;
+            else if(clientSocket.lastAck == clientSocket.lastSent){
+                TCPpack->seq++;
+                TCPpack->flags = DATA;
 
-            makePack(&sendPackage, TOS_NODE_ID, 1, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
-            call RSender.send(sendPackage, tempSocket.dest.addr);
+                for(i = 0; i < clientSocket.effectiveWindow; i++){
+                    TCPpack->data[i] = clientSocket.sendBuff[i];
+                    clientSocket.lastSent = TCPpack->data[i];
+                    // dbg(TRANSPORT_CHANNEL, "TCP data payload is %d \n", TCPpack->data[i]);
+                }
+                
+                call sockets.insert(fd, clientSocket);
+
+                makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+                call RSender.send(sendPackage, clientSocket.dest.addr);
+                return SUCCESS;
+            }
+            else{
+                return FAIL;
+            }
+
         }
         else{
             dbg(TRANSPORT_CHANNEL, "ERROR in sendBuffer: socket list does not contain fd \n");
             return FAIL;
         }
         // socket_store_t tempSocket = call sockets.get(fd);
+    }
+
+    command error_t Transport.sendAck(uint8_t fd){
+
+        socket_store_t serverSocket;
+        tcp_segment* TCPpack;
+        pack sendPackage;
+
+        serverSocket = call sockets.get(fd);
+
+        TCPpack = (tcp_segment*)(sendPackage.payload);
+        TCPpack->destPort = serverSocket.dest.port;
+        TCPpack->srcPort = serverSocket.src.port;
+        TCPpack->advWindow = 5;
+        TCPpack->flags = DATA_ACK;
+
+        //(Flags = SYN ACK, Ack = x+1, SequenceNum = y) //need to fix this
+        // TCPpack->seq = myMsg->seq+1; 
+        TCPpack->ACK = serverSocket.lastRcvd;
+        dbg(TRANSPORT_CHANNEL, "The last received from server is %d \n", serverSocket.lastRcvd);
+        // TCPpack->flags = DATA_ACK;
+        // TCPpack->advWindow = 5;
+        
+        // serverSocket = call sockets.get(fd);
+
+        // serverSocke
+        dbg(TRANSPORT_CHANNEL, "Syn Ack Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
+        makePack(&sendPackage, TOS_NODE_ID, serverSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+        call RSender.send(sendPackage, serverSocket.dest.addr);
     }
 
     command error_t Transport.checkConnection(uint8_t fd){

@@ -36,6 +36,8 @@ module Node{
 
 implementation{
    pack sendPackage;
+   uint16_t transferGlobal;
+   uint16_t dataWritten = 1;
 
    // Prototypes
    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
@@ -129,7 +131,7 @@ implementation{
          dbg(TRANSPORT_CHANNEL, "Server state listening failed\n");
       }
       
-      call serverTimer.startPeriodic(30000);
+      call serverTimer.startPeriodic(5000);
    }
 
    event void serverTimer.fired()
@@ -137,12 +139,21 @@ implementation{
       socket_t newFd = call Transport.accept(fd);
       socket_t readFd;
       uint8_t i = 0;
+      bool check = FALSE;
       uint16_t dataRead = 0;
+      uint16_t bufflen = 5;
       uint8_t readBuff[SOCKET_BUFFER_SIZE];
 
       if(newFd != NULL)
       {
-         call acceptedSockets.pushback(fd);
+         for(i = 0; i<call acceptedSockets.size(); i++){
+            if(fd == call acceptedSockets.get(i)){
+               check = TRUE;
+            }
+         }
+         if(check == FALSE){
+            call acceptedSockets.pushback(fd);
+         }
       }
       if(call Transport.checkConnection(fd) == SUCCESS)
       {
@@ -152,14 +163,14 @@ implementation{
 
          for(i = 0; i < call acceptedSockets.size(); i++){ //get accepted sockets, read, and print
             readFd = call acceptedSockets.get(i);
-            dataRead = call Transport.read(readFd, readBuff, SOCKET_BUFFER_SIZE);
+            dataRead = call Transport.read(readFd, readBuff, bufflen);
+            call Transport.sendAck(fd);
          }
       }
 
    }
    
    socket_addr_t clientSocketAddress;
-   uint16_t transferGlobal;
 
    event void CommandHandler.setTestClient(uint16_t dest, uint16_t srcPort, uint16_t destPort, uint16_t transfer){
       dbg(TRANSPORT_CHANNEL, "Initiating client at node %d and binding it to port %d\n", TOS_NODE_ID, srcPort);
@@ -185,7 +196,7 @@ implementation{
       if(call Transport.connect(fd, &serverSocketAddress) == SUCCESS)
       {
          dbg(TRANSPORT_CHANNEL, "Server and client connection started successfully...\n");
-         // call clientTimer.startPeriodic(20000); //periodically write buffer
+         call clientTimer.startPeriodic(10000); //periodically write buffer
          transferGlobal = transfer;
       }
       else
@@ -197,32 +208,40 @@ implementation{
    event void clientTimer.fired()
     {
       uint16_t i = 0; 
-      uint16_t dataWritten = 0;
+      uint16_t bufferWritten;
+      uint16_t sendBuff;
       uint8_t writeBuff[transferGlobal];
+
+      sendBuff = 0;
 
       if(transferGlobal != NULL)
       {
          if(call Transport.checkConnection(fd) == SUCCESS){
             for(i = 0; i < transferGlobal; i++) // sending 16 bit unsigned integers from 0 to transfer
             {
-               writeBuff[i] = i+1;
+               sendBuff = dataWritten+i;
+               writeBuff[i] = sendBuff;
+               // dbg(TRANSPORT_CHANNEL, "Data written in buffer is %d \n", writeBuff[i]);
             }
 
-            dataWritten = call Transport.write(fd, writeBuff, transferGlobal);
-            call Transport.sendBuffer(fd);
+            bufferWritten = call Transport.write(fd, writeBuff, transferGlobal);
+            // dbg(TRANSPORT_CHANNEL, "Data written so far %d \n", dataWritten);
          }
       }
-      dbg(TRANSPORT_CHANNEL, "Data written so far %d \n", dataWritten);
-      if(transferGlobal - dataWritten == 0)
+      if(transferGlobal == NULL)
       {
          // Start teardown
          call Transport.close(fd);
          call clientTimer.stop();
          dbg(TRANSPORT_CHANNEL, "DATA WRITING STOPPED!!!\n");
       }
-      else
+      else if(call Transport.sendBuffer(fd) == SUCCESS)
       {
-         transferGlobal = transferGlobal - dataWritten;
+         dataWritten += bufferWritten;
+         transferGlobal = transferGlobal - bufferWritten;
+      }
+      else{
+         dbg(TRANSPORT_CHANNEL, "SendBuffer failed... Resend \n");
       }
     }
 
