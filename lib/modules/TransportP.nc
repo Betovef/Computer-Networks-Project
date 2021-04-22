@@ -113,12 +113,11 @@ implementation{
         uint16_t i = 0;
         uint16_t temp = 0;
         
-        dbg(TRANSPORT_CHANNEL, "Writing data from fd %d..\n", fd);
+        // dbg(TRANSPORT_CHANNEL, "Writing data from fd %d..\n", fd);
 
         if(call sockets.contains(fd))
         {
             clientSocket = call sockets.get(fd);
-            dbg(TRANSPORT_CHANNEL, "WHAT IS GOIGN ON in here %d\n", clientSocket.dest.addr);
         }
         else{
             dbg(TRANSPORT_CHANNEL, "ERROR: socket list does not contain fd \n");
@@ -134,7 +133,6 @@ implementation{
             i++;
         }
 
-        
         call sockets.insert(fd, clientSocket);
 
         return (i+1);
@@ -254,7 +252,7 @@ implementation{
                     serverSocket.lastRcvd = myMsg->data[i];
                     // dbg(TRANSPORT_CHANNEL, "writing rcvdBuff %d \n ", serverSocket.rcvdBuff[i]);
                 }
-
+                dbg(TRANSPORT_CHANNEL, "The last received from server is %d \n", serverSocket.lastRcvd);
                 
                 call sockets.insert(fd, serverSocket);
 
@@ -268,10 +266,8 @@ implementation{
                 clientSocket.lastAck = myMsg->ACK;
                 clientSocket.effectiveWindow = myMsg->advWindow;
 
-                dbg(TRANSPORT_CHANNEL, "Client destination IS %d \n", clientSocket.dest.addr);
-                dbg(TRANSPORT_CHANNEL, "LAST INTEGER IS %d \n", clientSocket.lastSent);
+                // dbg(TRANSPORT_CHANNEL, "Client lastSent is %d \n", clientSocket.lastSent);
                 dbg(TRANSPORT_CHANNEL, "Client lastAck is %d\n", clientSocket.lastAck);
-                dbg(TRANSPORT_CHANNEL, "Client effective window  is %d\n", clientSocket.effectiveWindow);
 
                 
                 call sockets.insert(fd, clientSocket);
@@ -320,23 +316,29 @@ implementation{
 
     command uint16_t Transport.read(socket_t fd, uint8_t *buff, uint16_t bufflen)
     {
-        // pack sendPackage;
         socket_store_t serverSocket;
-        // uint16_t dataNotWritten;
         uint8_t i = 0;
         uint8_t temp = 0;
 
-        dbg(TRANSPORT_CHANNEL, "Reading socket %d \n", fd);
-
         serverSocket = call sockets.get(fd);
-        for(i = 0; i <5; i++)
-        {
-            temp = serverSocket.rcvdBuff[i];
 
-            dbg(TRANSPORT_CHANNEL, "Read %d in server buffer\n", temp);
+        // dbg(TRANSPORT_CHANNEL, "Last read is %d \n", serverSocket.lastRead);
+        // dbg(TRANSPORT_CHANNEL, "Last recieved is %d \n", serverSocket.lastRcvd);
+        if(serverSocket.lastRead != serverSocket.lastRcvd){
+            // dbg(TRANSPORT_CHANNEL, "Reading socket %d \n", fd);
+            for(i = 0; i < bufflen; i++)
+            {
+                temp = serverSocket.rcvdBuff[i];
+                dbg(TRANSPORT_CHANNEL, "Reading data %d \n", temp);
+                serverSocket.lastRead = temp;
+            }
+
+            call sockets.insert(fd, serverSocket);
+            return (i+1);
         }
-
-        return (i+1);
+        else{
+            return 0;
+        }
 
     }
 
@@ -473,7 +475,7 @@ implementation{
         // TCPpack = (tcp_segment*)(sendPackage.payload);
         if(call sockets.contains(fd)){
 
-            dbg(TRANSPORT_CHANNEL, "clientSocket.lastAck: %d clientSocket.lastSent %d \n", clientSocket.lastAck, clientSocket.lastSent);
+            // dbg(TRANSPORT_CHANNEL, "clientSocket.lastAck: %d clientSocket.lastSent %d \n", clientSocket.lastAck, clientSocket.lastSent);
             if(clientSocket.sendBuff[0] == 1){
                 TCPpack->seq = 0;
                 TCPpack->ACK = 1;
@@ -536,7 +538,7 @@ implementation{
         //(Flags = SYN ACK, Ack = x+1, SequenceNum = y) //need to fix this
         // TCPpack->seq = myMsg->seq+1; 
         TCPpack->ACK = serverSocket.lastRcvd;
-        dbg(TRANSPORT_CHANNEL, "The last received from server is %d \n", serverSocket.lastRcvd);
+        // dbg(TRANSPORT_CHANNEL, "The last received from server is %d \n", serverSocket.lastRcvd);
         // TCPpack->flags = DATA_ACK;
         // TCPpack->advWindow = 5;
         

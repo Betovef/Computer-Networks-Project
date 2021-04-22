@@ -214,6 +214,7 @@ implementation{
 
       sendBuff = 0;
 
+      dbg(TRANSPORT_CHANNEL, "transfer status %d \n", transferGlobal);
       if(transferGlobal != NULL)
       {
          if(call Transport.checkConnection(fd) == SUCCESS){
@@ -231,9 +232,10 @@ implementation{
       if(transferGlobal == NULL)
       {
          // Start teardown
-         call Transport.close(fd);
+         dbg(TRANSPORT_CHANNEL, "Data writing COMPLETED !!!\n");
          call clientTimer.stop();
-         dbg(TRANSPORT_CHANNEL, "DATA WRITING STOPPED!!!\n");
+         call serverTimer.stop();
+         call Transport.close(fd);
       }
       else if(call Transport.sendBuffer(fd) == SUCCESS)
       {
