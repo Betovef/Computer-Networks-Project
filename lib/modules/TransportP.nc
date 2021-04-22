@@ -154,12 +154,8 @@ implementation{
         pack sendPackage; //new message packet
 
         //Three-way handshake
-        if(myMsg->flags == SYN)
-        {
-            fd = getfd(myMsg->destPort);
-            serverSocket = call sockets.get(fd);
-            dbg(TRANSPORT_CHANNEL, "SYN Packet Arrived from Node %d for Port %d\n", package->src, myMsg->srcPort);
-            if(serverSocket.state == LISTEN)
+        if(myMsg->flags == SYN || myMsg->flags == SYN_ACK || myMsg->flags == ACK){
+            if(myMsg->flags == SYN)
             {
                 fd = getfd(myMsg->destPort);
                 serverSocket = call sockets.get(fd);
@@ -186,8 +182,8 @@ implementation{
                     TCPpack->advWindow = serverSocket.effectiveWindow; //avertise window to 5
                     
                     // Server received SYN message sending reply SYN+ACK 
-                    makePack(&sendPackage, TOS_NODE_ID, serverSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
                     dbg(TRANSPORT_CHANNEL, "Syn Ack Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
+                    makePack(&sendPackage, TOS_NODE_ID, serverSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
                     call RSender.send(sendPackage, serverSocket.dest.addr); 
                 }
                 else
@@ -226,7 +222,6 @@ implementation{
                 call RSender.send(sendPackage, clientSocket.dest.addr); 
                 call acceptList.pushback(fd);
                 // call clientTimer.startOneShot(15000);
-                // dbg(TRANSPORT_CHANNEL, "Client ready to write DATA starting STOP AND WAIT PROTOCOL\n");
             }
             else if(myMsg->flags == ACK)
             {
@@ -440,7 +435,7 @@ implementation{
         // TCPpack = (tcp_segment*)(sendPackage.payload);
         if(call sockets.contains(fd)){
 
-            dbg(TRANSPORT_CHANNEL, "WHAT IS GOIGN ON %d == %d \n", clientSocket.lastAck, clientSocket.lastSent);
+            dbg(TRANSPORT_CHANNEL, "clientSocket.lastAck: %d clientSocket.lastSent %d \n", clientSocket.lastAck, clientSocket.lastSent);
             if(clientSocket.sendBuff[0] == 1){
                 TCPpack->seq = 0;
                 TCPpack->ACK = 1;
