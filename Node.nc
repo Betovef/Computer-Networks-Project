@@ -131,7 +131,7 @@ implementation{
          dbg(TRANSPORT_CHANNEL, "Server state listening failed\n");
       }
       
-      call serverTimer.startPeriodic(5000);
+      call serverTimer.startPeriodic(3000);
    }
 
    event void serverTimer.fired()
@@ -196,7 +196,7 @@ implementation{
       if(call Transport.connect(fd, &serverSocketAddress) == SUCCESS)
       {
          dbg(TRANSPORT_CHANNEL, "Server and client connection started successfully...\n");
-         call clientTimer.startPeriodic(10000); //periodically write buffer
+         call clientTimer.startPeriodic(4000); //periodically write buffer
          transferGlobal = transfer;
       }
       else
@@ -214,7 +214,6 @@ implementation{
 
       sendBuff = 0;
 
-      dbg(TRANSPORT_CHANNEL, "transfer status %d \n", transferGlobal);
       if(transferGlobal != NULL)
       {
          if(call Transport.checkConnection(fd) == SUCCESS){
@@ -227,6 +226,7 @@ implementation{
 
             bufferWritten = call Transport.write(fd, writeBuff, transferGlobal);
             // dbg(TRANSPORT_CHANNEL, "Data written so far %d \n", dataWritten);
+            dbg(TRANSPORT_CHANNEL, "transfer status %d \n", transferGlobal);
          }
       }
       if(transferGlobal == NULL)
@@ -234,13 +234,14 @@ implementation{
          // Start teardown
          dbg(TRANSPORT_CHANNEL, "Data writing COMPLETED !!!\n");
          call clientTimer.stop();
-         call serverTimer.stop();
+         // call serverTimer.stop();
          call Transport.close(fd);
       }
       else if(call Transport.sendBuffer(fd) == SUCCESS)
       {
          dataWritten += bufferWritten;
          transferGlobal = transferGlobal - bufferWritten;
+         // dbg(TRANSPORT_CHANNEL, "bufferWritten status %d \n", bufferWritten);
       }
       else{
          dbg(TRANSPORT_CHANNEL, "SendBuffer failed... Resend \n");

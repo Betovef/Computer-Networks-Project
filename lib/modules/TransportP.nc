@@ -126,7 +126,7 @@ implementation{
 
         // dbg(TRANSPORT_CHANNEL, "WHAT IS GOIGN ON %d\n", clientSocket.effectiveWindow);
 
-        while(i < TCP_MAX_PAYLOAD_SIZE && i < clientSocket.effectiveWindow){
+        while(i < TCP_MAX_PAYLOAD_SIZE && i < clientSocket.effectiveWindow && i < bufflen){
             clientSocket.sendBuff[i] = buff[i];
             clientSocket.lastWritten = buff[i];
             dbg(TRANSPORT_CHANNEL, " Writing %d\n", clientSocket.sendBuff[i]);
@@ -135,7 +135,7 @@ implementation{
 
         call sockets.insert(fd, clientSocket);
 
-        return (i+1);
+        return (i);
 
     }
 
