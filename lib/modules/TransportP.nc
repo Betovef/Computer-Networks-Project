@@ -406,7 +406,7 @@ implementation{
 
             }
 
-            else if(tempSocket.state == CLOSE_WAIT){
+            else if(tempSocket.state == CLOSE_WAIT){ //The reciever sends a FIN packet and becomes LAST_ACK
                 //Prepare packet
                 TCPpack = (tcp_segment*)(sendPackage.payload);
                 TCPpack->destPort = tempSocket.dest.port;

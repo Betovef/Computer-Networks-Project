@@ -235,6 +235,7 @@ implementation{
          dbg(TRANSPORT_CHANNEL, "Data writing COMPLETED !!!\n");
          call clientTimer.stop();
          call Transport.close(fd);
+         call Transport.close(fd); //Has to be called twice according to documentation
       }
       else if(call Transport.sendBuffer(fd) == SUCCESS)
       {
