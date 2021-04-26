@@ -234,7 +234,6 @@ implementation{
          // Start teardown
          dbg(TRANSPORT_CHANNEL, "Data writing COMPLETED !!!\n");
          call clientTimer.stop();
-         // call serverTimer.stop();
          call Transport.close(fd);
       }
       else if(call Transport.sendBuffer(fd) == SUCCESS)
@@ -247,6 +246,10 @@ implementation{
          dbg(TRANSPORT_CHANNEL, "SendBuffer failed... Resend \n");
       }
     }
+
+   event void CommandHandler.ClientClosed(uint16_t addr, uint16_t dest, uint16_t srcPort, uint16_t destPort){
+      dbg(TRANSPORT_CHANNEL, "Closing client with destination %d and destination port %d\n",dest, destPort);
+   }
 
    event void CommandHandler.setAppServer(){}
 
