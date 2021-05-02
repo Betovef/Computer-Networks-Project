@@ -180,7 +180,7 @@ implementation{
                     TCPpack->advWindow = serverSocket.effectiveWindow; //avertise window to 5
                     
                     // Server received SYN message sending reply SYN+ACK 
-                    dbg(TRANSPORT_CHANNEL, "Syn Ack Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
+                    dbg(TRANSPORT_CHANNEL, "Syn ACK Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
                     makePack(&sendPackage, TOS_NODE_ID, serverSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
                     call RSender.send(sendPackage, serverSocket.dest.addr); 
                 }
@@ -192,7 +192,7 @@ implementation{
             }
             else if(myMsg->flags == SYN_ACK)
             {
-                dbg(TRANSPORT_CHANNEL, "SYN Ack Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort); 
+                dbg(TRANSPORT_CHANNEL, "SYN ACK Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort); 
                 fd = getfd(myMsg->destPort);
                 clientSocket = call sockets.get(fd);
 
@@ -216,14 +216,14 @@ implementation{
 
                 // Client received SYN ACK message sending reply ACK 
                 makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
-                dbg(TRANSPORT_CHANNEL, "Ack Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
+                dbg(TRANSPORT_CHANNEL, "ACK Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
                 call RSender.send(sendPackage, clientSocket.dest.addr); 
                 call acceptList.pushback(fd);
                 // call clientTimer.startOneShot(15000);
             }
             else if(myMsg->flags == ACK)
             {
-                dbg(TRANSPORT_CHANNEL, "Ack Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort); 
+                dbg(TRANSPORT_CHANNEL, "ACK Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort); 
                 fd = getfd(myMsg->destPort);
                 serverSocket = call sockets.get(fd);
 
@@ -378,7 +378,7 @@ implementation{
             Once ACK+FIN is received, same process
         */
 
-        dbg(TRANSPORT_CHANNEL, "Starting Teardown\n");
+       
 
         if(call sockets.contains(fd)){
             socket_store_t tempSocket;
@@ -398,6 +398,7 @@ implementation{
 
                 //Update socket state
                 tempSocket.state = FIN_WAIT_1;
+                dbg(TRANSPORT_CHANNEL, "Starting Teardown\n");
                 dbg(TRANSPORT_CHANNEL, "Socket in FIN_WAIT_1 state\n");
                 dbg(TRANSPORT_CHANNEL, "Sending remaining data...\n");
 
