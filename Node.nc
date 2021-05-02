@@ -31,6 +31,7 @@ module Node{
    uses interface Transport;
    uses interface Timer<TMilli> as clientTimer;
    uses interface Timer<TMilli> as serverTimer;
+   uses interface Timer<TMilli> as timeWait;
    uses interface List<socket_t> as acceptedSockets;
 }
 
@@ -244,11 +245,28 @@ implementation{
       }
       else{
          dbg(TRANSPORT_CHANNEL, "SendBuffer failed... Resend \n");
+         call clientTimer.startPeriodic(6000);
       }
     }
 
+   event void timeWait.fired(){
+      dbg(TRANSPORT_CHANNEL, "One shot\n");
+      if(call clientTimer.isRunning()){
+         dbg(TRANSPORT_CHANNEL, "Resending buffer\n");
+         call Transport.sendBuffer(fd);
+      }
+      else if(call serverTimer.isRunning()){
+         dbg(TRANSPORT_CHANNEL, "Resending ACK\n");
+         call Transport.sendAck(fd);
+      }
+      
+      // call clientTimer.startPeriodic(5000);
+   }
+
    event void CommandHandler.ClientClosed(uint16_t addr, uint16_t dest, uint16_t srcPort, uint16_t destPort){
       dbg(TRANSPORT_CHANNEL, "Closing client with destination %d and destination port %d\n",dest, destPort);
+      call Transport.close(fd);
+      call clientTimer.stop();
    }
 
    event void CommandHandler.setAppServer(){}

@@ -275,7 +275,7 @@ implementation{
             }
         }
         else{
-                //TERMINATION CLOSING CONNECTION
+            //TERMINATION CLOSING CONNECTION
             if(myMsg->flags == FIN)
             {
                 fd = getfd(myMsg->destPort);
@@ -285,6 +285,7 @@ implementation{
 
                 //updating side to CLOSED
                 tempSocket.state = CLOSE_WAIT;
+                dbg(TRANSPORT_CHANNEL, "Socket in CLOSE_WAIT state\n");
                 tempSocket.dest.port = myMsg->srcPort;
                 tempSocket.dest.addr = package->src;
 
@@ -294,7 +295,7 @@ implementation{
             else if(myMsg->flags == FIN_ACK) //only if both nodes close
             {
                 dbg(TRANSPORT_CHANNEL, "FIN ACK Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort);
-
+                dbg(TRANSPORT_CHANNEL, "Socket in TIME_WAIT state\n");
                 fd = getfd(myMsg->destPort);
                 tempSocket = call sockets.get(fd);
 
@@ -397,10 +398,12 @@ implementation{
 
                 //Update socket state
                 tempSocket.state = FIN_WAIT_1;
+                dbg(TRANSPORT_CHANNEL, "Socket in FIN_WAIT_1 state\n");
+                dbg(TRANSPORT_CHANNEL, "Sending remaining data...\n");
 
                 call sockets.insert(fd, tempSocket);
 
-                dbg(TRANSPORT_CHANNEL, "Fin Packet Sent to Node %d for Port %d \n", tempSocket.dest.addr, tempSocket.dest.port);
+                dbg(TRANSPORT_CHANNEL, "FIN Packet Sent to Node %d for Port %d \n", tempSocket.dest.addr, tempSocket.dest.port);
                 makePack(&sendPackage, TOS_NODE_ID, tempSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
                 call RSender.send(sendPackage, tempSocket.dest.addr);
 
@@ -424,10 +427,6 @@ implementation{
             }
 
         }
-        // tempSocket.state = FIN_WAIT_2;
-        // tempSocket.state = LAST_ACK;
-
-        dbg(TRANSPORT_CHANNEL, "Connection Terminated\n");
     }
 
     command error_t Transport.release(socket_t fd)
@@ -500,7 +499,7 @@ implementation{
                 
                 call sockets.insert(fd, clientSocket);
 
-                dbg(TRANSPORT_CHANNEL, "Data Packet Sent to Node %d for Port %d\n", clientSocket.dest.addr, clientSocket.dest.port);
+                dbg(TRANSPORT_CHANNEL, "DATA Packet Sent to Node %d for Port %d\n", clientSocket.dest.addr, clientSocket.dest.port);
                 makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
                 call RSender.send(sendPackage, clientSocket.dest.addr);
                 return SUCCESS;
@@ -522,6 +521,7 @@ implementation{
                 return SUCCESS;
             }
             else{
+                dbg(TRANSPORT_CHANNEL, "Server has not sent ack\n");
                 return FAIL;
             }
 
@@ -551,7 +551,7 @@ implementation{
             TCPpack->flags = DATA_ACK;
             TCPpack->ACK = serverSocket.lastRcvd;
 
-            dbg(TRANSPORT_CHANNEL, "Data Ack Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
+            dbg(TRANSPORT_CHANNEL, "DATA ACK Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
         }
         else if(serverSocket.state == CLOSE_WAIT){
             TCPpack->flags = FIN_ACK;
@@ -566,7 +566,7 @@ implementation{
                     call acceptList.pushback(temp);
                 }
             }
-            dbg(TRANSPORT_CHANNEL, "Fin Ack Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
+            dbg(TRANSPORT_CHANNEL, "FIN ACK Packet Sent to Node %d for Port %d\n", serverSocket.dest.addr, serverSocket.dest.port);
         }
 
         makePack(&sendPackage, TOS_NODE_ID, serverSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);

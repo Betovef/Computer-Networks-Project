@@ -27,15 +27,14 @@ def main():
     # After sending a ping, simulate a little to prevent collision.
 
     # ***IMPORTANT*** - change TABLE_SIZE according to the number of nodes when using routing
-    s.runTime(200);
+    s.runTime(100);
     s.testServer(1, 10);
     # s.routeDMP(9);
-    s.runTime(100);
-    s.testClient(5, 1,   5, 10 , 100);
-    # s.runTime(100);
+    s.runTime(300);
+    s.testClient(5, 1,   5, 10 , 30);
+    s.runTime(300);
     # s.ClientClosed(5, 1, 10, 5);
-    # s.ping(1, 8, "Hello World!\n");
-    s.runTime(100);
+    # s.runTime(200);
  
 
 if __name__ == '__main__':

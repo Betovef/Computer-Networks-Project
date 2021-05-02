@@ -70,6 +70,9 @@ implementation {
     components new TimerMilliC() as serverTimer;
     Node.serverTimer->serverTimer;
 
+    components new TimerMilliC() as timeWait;
+    Node.timeWait->timeWait;
+
 
     
 
