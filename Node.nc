@@ -270,6 +270,19 @@ implementation{
       call clientTimer.stop();
    }
 
+   event void CommandHandler.hello(char* username, int clientport){
+
+   }
+   event void CommandHandler.msg(char* msg){
+
+   }
+   event void CommandHandler.whisper(char *username, char* msg){
+
+   }
+   event void CommandHandler.listusr(){
+
+   }
+
    event void CommandHandler.setAppServer(){}
 
    event void CommandHandler.setAppClient(){}

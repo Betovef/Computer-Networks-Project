@@ -69,18 +69,38 @@ implementation{
                 break;
 
             case CMD_TEST_CLIENT:
-                dbg(COMMAND_CHANNEL, "Command Type: Client\n");
+                dbg(COMMAND_CHANNEL, "Command Type: Test Client\n");
                 signal CommandHandler.setTestClient(buff[0], buff[1], buff[2], buff[3]);
                 break;
 
             case CMD_TEST_SERVER:
-                dbg(COMMAND_CHANNEL, "Command Type: Client\n");
+                dbg(COMMAND_CHANNEL, "Command Type: Test Server\n");
                 signal CommandHandler.setTestServer(buff[0]);
                 break;
 
             case CMD_CLIENT_CLOSED:
-                dbg(COMMAND_CHANNEL, "Command Type: Client\n");
+                dbg(COMMAND_CHANNEL, "Command Type: Client  Closed\n");
                 signal CommandHandler.ClientClosed(buff[0], buff[1], buff[2], buff[3]);
+                break;
+
+            case CMD_HELLO:
+                dbg(COMMAND_CHANNEL, "Command Type: Hello\n");
+                signal CommandHandler.hello(&buff[0], buff[1]);
+                break;
+
+            case CMD_MSG:
+                dbg(COMMAND_CHANNEL, "Command Type:Msg\n");
+                signal CommandHandler.msg(&buff[0]);
+                break;
+            
+            case CMD_WHISPER:
+                dbg(COMMAND_CHANNEL, "Command Type: Whisper\n");
+                signal CommandHandler.whisper(&buff[0], &buff[1]);
+                break;
+
+            case CMD_LISTUSR:
+                dbg(COMMAND_CHANNEL, "Command Type: Listusr\n");
+                signal CommandHandler.listusr();
                 break;
 
             default:

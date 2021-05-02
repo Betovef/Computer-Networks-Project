@@ -16,6 +16,11 @@ class TestSim:
     CMD_TEST_CLIENT=4
     CMD_TEST_SERVER=5
     CMD_CLIENT_CLOSED=7
+    CMD_HELLO=8
+    CMD_MSG=10
+    CMD_WHISPER=11
+    CMD_LISTUSR=12
+
 
 
     # CHANNELS - see includes/channels.h
@@ -141,6 +146,18 @@ class TestSim:
 
     def ClientClosed(self, src, dest, destPort, srcPort):
         self.sendCMD(self.CMD_CLIENT_CLOSED, src, "{0}{1}{2}{3}".format(chr(src), chr(dest), chr(destPort), chr(srcPort)));
+
+    def hello(self, src, username, clientport):
+        self.sendCMD(self.CMD_HELLO, src, "{0}{1}".format(username, chr(clientport)));
+
+    def msg(self, src, msg):
+        self.sendCMD(self.CMD_MSG, src, "{0}".format(msg));
+    
+    def whisper(self, src, username, msg):
+        self.sendCMD(self.CMD_WHISPER, src, "{0}{1}".format(username, msg));
+
+    def listur(self, src):
+        self.sendCMD(self.CMD_LISTUSR, src, "Users List");
 
 def main():
     s = TestSim();
