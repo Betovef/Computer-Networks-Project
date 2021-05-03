@@ -132,7 +132,7 @@ implementation{
          dbg(TRANSPORT_CHANNEL, "Server state listening failed\n");
       }
       
-      call serverTimer.startPeriodic(3000);
+      // call serverTimer.startPeriodic(3000);
    }
 
    event void serverTimer.fired()
@@ -197,7 +197,7 @@ implementation{
       if(call Transport.connect(fd, &serverSocketAddress) == SUCCESS)
       {
          dbg(TRANSPORT_CHANNEL, "Server and client connection started successfully...\n");
-         call clientTimer.startPeriodic(4000); //periodically write buffer
+         // call clientTimer.startPeriodic(4000); //periodically write buffer
          transferGlobal = transfer;
       }
       else
@@ -246,23 +246,9 @@ implementation{
       }
       else{
          dbg(TRANSPORT_CHANNEL, "SendBuffer failed... Resend \n");
-         call clientTimer.startPeriodic(6000);
+         // call clientTimer.startPeriodic(6000);
       }
     }
-
-   event void timeWait.fired(){
-      dbg(TRANSPORT_CHANNEL, "One shot\n");
-      if(call clientTimer.isRunning()){
-         dbg(TRANSPORT_CHANNEL, "Resending buffer\n");
-         call Transport.sendBuffer(fd);
-      }
-      else if(call serverTimer.isRunning()){
-         dbg(TRANSPORT_CHANNEL, "Resending ACK\n");
-         call Transport.sendAck(fd);
-      }
-      
-      // call clientTimer.startPeriodic(5000);
-   }
 
    event void CommandHandler.ClientClosed(uint16_t addr, uint16_t dest, uint16_t srcPort, uint16_t destPort){
       dbg(TRANSPORT_CHANNEL, "Closing client with destination %d and destination port %d\n",dest, destPort);
@@ -270,7 +256,56 @@ implementation{
       call clientTimer.stop();
    }
 
-   event void CommandHandler.hello(char* username, int clientport){
+   char* helloUser;
+
+   event void timeWait.fired(){
+      // dbg(TRANSPORT_CHANNEL, "Sending hello from user %s\n", user);
+
+      if(call RoutingTable.contains(1))
+      {
+         call Transport.write(fd, helloUser, strlen(helloUser));
+         call Transport.sendBuffer(fd);
+      }
+   }
+
+   event void CommandHandler.hello(uint16_t clientport, char* username){
+      uint16_t i = 0;
+      size_t len = strlen(username);
+      char* user = malloc(len+1);
+
+      user[i] = 'h';
+      for(i = 1; i < len+1; i++){
+         user[i] = username[i-1];
+      }
+      user[i] = '\0';
+      helloUser = user; //appending h command to username
+
+      fd =  call Transport.socket();
+      //setting up src info
+      clientSocketAddress.addr = TOS_NODE_ID;
+      clientSocketAddress.port = clientport;
+      //setting up dest info
+      serverSocketAddress.addr = 1;
+      serverSocketAddress.port = 41;
+
+      //if connection succesful, start timer
+      dbg(TRANSPORT_CHANNEL, "Creating connection with server 1 at port 41\n");
+      if(call Transport.bind(fd, &clientSocketAddress) == SUCCESS)
+      {
+         dbg(TRANSPORT_CHANNEL, "Client binding succesful!\n");
+      }
+      else{
+         dbg(TRANSPORT_CHANNEL, "Client binding failed\n");
+      }
+      if(call Transport.connect(fd, &serverSocketAddress) == SUCCESS)
+      {
+         dbg(TRANSPORT_CHANNEL, "Server and client connection started successfully...\n");
+         call timeWait.startOneShotAt(call timeWait.getNow(), 3000); 
+      }
+      else
+      {
+         dbg(TRANSPORT_CHANNEL, "Connection failed\n");
+      }
 
    }
    event void CommandHandler.msg(char* msg){

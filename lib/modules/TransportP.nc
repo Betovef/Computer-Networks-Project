@@ -14,6 +14,7 @@ module TransportP{
     uses interface SimpleSend as RSender;
     uses interface Hashmap<Route> as RoutingTable;
     uses interface Hashmap<socket_store_t> as sockets;
+    uses interface Hashmap<char*> as usersTable;
     uses interface List<socket_t> as acceptList;
 }
 implementation{
@@ -107,7 +108,6 @@ implementation{
 
     command uint16_t Transport.write(socket_t fd, uint8_t *buff, uint16_t bufflen)
     {
-        pack sendPackage;
         socket_store_t clientSocket;
         uint16_t count = 0;
         uint16_t i = 0;
@@ -129,7 +129,7 @@ implementation{
         while(i < TCP_MAX_PAYLOAD_SIZE && i < clientSocket.effectiveWindow && i < bufflen){
             clientSocket.sendBuff[i] = buff[i];
             clientSocket.lastWritten = buff[i];
-            dbg(TRANSPORT_CHANNEL, " Writing %d\n", clientSocket.sendBuff[i]);
+            dbg(TRANSPORT_CHANNEL, " Writing %c\n", clientSocket.sendBuff[i]); //change %d for project 3 and %s for project 4
             i++;
         }
 
@@ -218,7 +218,7 @@ implementation{
                 makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
                 dbg(TRANSPORT_CHANNEL, "ACK Packet Sent to Node %d for Port %d \n", clientSocket.dest.addr, clientSocket.dest.port);
                 call RSender.send(sendPackage, clientSocket.dest.addr); 
-                call acceptList.pushback(fd);
+                call acceptList.pushback(package->src);
                 // call clientTimer.startOneShot(15000);
             }
             else if(myMsg->flags == ACK)
@@ -236,7 +236,7 @@ implementation{
                 call sockets.insert(fd, serverSocket);
 
                 dbg(TRANSPORT_CHANNEL, "Connection Client/Server has been ESTABLISHED\n");
-                call acceptList.pushback(fd);  
+                call acceptList.pushback(package->src); 
             }
         }
         else if(myMsg->flags == DATA || myMsg->flags == DATA_ACK){
@@ -246,15 +246,39 @@ implementation{
                 dbg(TRANSPORT_CHANNEL, "Data Packet Arrived from Node %d for Port %d \n", package->src, myMsg->srcPort);
                 fd = getfd(myMsg->destPort);
                 serverSocket = call sockets.get(fd);
+                if(myMsg->destPort == 41){
+                    char* temp;
+                    socket_t connectedSocket;
+                    if(myMsg->data[0] == 'h'){ // if h appended to beggining it is a hello command
+                        char* newUser = malloc(strlen(myMsg->data)-1);
+                        for(i = 1; i< strlen(myMsg->data); i++){
+                            newUser[i-1] = myMsg->data[i];
+                        }
+                        newUser[i] = '\0';
+                        dbg(TRANSPORT_CHANNEL, "User %s src %d added to server \n", newUser, package->src);
+                        call usersTable.insert(package->src, newUser);
+                        
+                        serverSocket.state = LISTEN; //listen for more connections
+                        call sockets.insert(fd, serverSocket);
 
-                for(i = 0; i < serverSocket.effectiveWindow; i++){
+                    }
+                    else{
+
+                    }
+                }
+                else{
+
+                    for(i = 0; i < serverSocket.effectiveWindow; i++){
                     serverSocket.rcvdBuff[i] = myMsg->data[i];
                     serverSocket.lastRcvd = myMsg->data[i];
                     // dbg(TRANSPORT_CHANNEL, "writing rcvdBuff %d \n ", serverSocket.rcvdBuff[i]);
+                    }
+                    dbg(TRANSPORT_CHANNEL, "The last received from server is %d \n", serverSocket.lastRcvd);
+                    
+                    call sockets.insert(fd, serverSocket);
                 }
-                dbg(TRANSPORT_CHANNEL, "The last received from server is %d \n", serverSocket.lastRcvd);
+
                 
-                call sockets.insert(fd, serverSocket);
 
             }
             else if(myMsg->flags == DATA_ACK)
