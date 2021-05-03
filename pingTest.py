@@ -28,11 +28,17 @@ def main():
 
     # ***IMPORTANT*** - change TABLE_SIZE according to the number of nodes when using routing
     s.runTime(100);
-    s.testServer(1, 10);
-    # s.routeDMP(9);
-    s.runTime(300);
-    s.testClient(5, 1,   5, 10 , 30);
-    s.runTime(300);
+    s.testServer(1, 41);
+    s.runTime(100);
+    # s.testClient(5, 1,   3, 10 , 30);
+    s.hello(5, "Bob", 3);
+    s.runTime(100);
+    s.hello(2, "Andi", 5);
+    s.runTime(100);
+    s.hello(3, "John", 4);
+    s.runTime(100);
+    # s.testClient(5, 1,   5, 10 , 30);
+    # s.runTime(300);
     # s.ClientClosed(5, 1, 10, 5);
     # s.runTime(200);
  

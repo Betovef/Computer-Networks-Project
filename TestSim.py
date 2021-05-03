@@ -148,7 +148,7 @@ class TestSim:
         self.sendCMD(self.CMD_CLIENT_CLOSED, src, "{0}{1}{2}{3}".format(chr(src), chr(dest), chr(destPort), chr(srcPort)));
 
     def hello(self, src, username, clientport):
-        self.sendCMD(self.CMD_HELLO, src, "{0}{1}".format(username, chr(clientport)));
+        self.sendCMD(self.CMD_HELLO, src, "{0}{1}".format(chr(clientport), username));
 
     def msg(self, src, msg):
         self.sendCMD(self.CMD_MSG, src, "{0}".format(msg));

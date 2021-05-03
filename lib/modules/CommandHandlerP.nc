@@ -85,11 +85,11 @@ implementation{
 
             case CMD_HELLO:
                 dbg(COMMAND_CHANNEL, "Command Type: Hello\n");
-                signal CommandHandler.hello(&buff[0], buff[1]);
+                signal CommandHandler.hello(buff[0], &buff[1]);
                 break;
 
             case CMD_MSG:
-                dbg(COMMAND_CHANNEL, "Command Type:Msg\n");
+                dbg(COMMAND_CHANNEL, "Command Type: Msg\n");
                 signal CommandHandler.msg(&buff[0]);
                 break;
             

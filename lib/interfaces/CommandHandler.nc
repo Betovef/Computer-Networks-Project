@@ -8,7 +8,7 @@ interface CommandHandler{
    event void setTestServer(uint16_t port);
    event void setTestClient(uint16_t dest, uint16_t srcPort, uint16_t destPort, uint16_t transfer);
    event void ClientClosed(uint16_t addr, uint16_t dest, uint16_t srcPort, uint16_t destPort);
-   event void hello(char* username, int clientport);
+   event void hello(uint16_t clientport, char* username);
    event void msg(char* msg);
    event void whisper(char *username, char* msg);
    event void listusr();
