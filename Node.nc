@@ -315,7 +315,12 @@ implementation{
 
    }
    event void CommandHandler.listusr(){
-
+      //send message from client to server, server replies with this
+      //example: listUsrRply Bob, Alice, John\r\n
+      //uint16_t i = 0; 
+      dbg(TRANSPORT_CHANNEL, "listUsrRply ");
+      //how to call function in transportP.nc to print
+      dbg(TRANSPORT_CHANNEL, "\n");
    }
 
    event void CommandHandler.setAppServer(){}
