@@ -256,14 +256,14 @@ implementation{
       call clientTimer.stop();
    }
 
-   char* helloUser;
+   char* dataGlobal;
 
    event void timeWait.fired(){
-      // dbg(TRANSPORT_CHANNEL, "Sending hello from user %s\n", user);
 
       if(call RoutingTable.contains(1))
       {
-         call Transport.write(fd, helloUser, strlen(helloUser));
+         // dbg(TRANSPORT_CHANNEL, "dataGlobal: %s \n", dataGlobal);
+         call Transport.write(fd, dataGlobal, strlen(dataGlobal));
          call Transport.sendBuffer(fd);
       }
    }
@@ -278,7 +278,7 @@ implementation{
          user[i] = username[i-1];
       }
       user[i] = '\0';
-      helloUser = user; //appending h command to username
+      dataGlobal = user; //appending h command to username
 
       fd =  call Transport.socket();
       //setting up src info
@@ -308,10 +308,23 @@ implementation{
       }
 
    }
-   event void CommandHandler.msg(char* msg){
+   event void CommandHandler.Msg(char* msg){
+      uint16_t i = 0;
+      size_t len = strlen(msg);
+      char* newData = malloc(len+1);
+
+      newData[i] = 'm';
+      for(i = 1; i < len+1; i++){
+         newData[i] = msg[i-1];
+      }
+      newData[i] = '\0';
+      dataGlobal = newData;
+
+      call timeWait.startOneShotAt(call timeWait.getNow(), 0);
 
    }
    event void CommandHandler.whisper(char *username, char* msg){
+      dbg(TRANSPORT_CHANNEL, "Say %s to %s\n", msg, username);
 
    }
    event void CommandHandler.listusr(){

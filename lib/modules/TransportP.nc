@@ -24,7 +24,6 @@ implementation{
 
     event void TransportTimer.fired()
     {
-        //need to work on this
     }
 
     // event void clientTimer.fired()
@@ -164,7 +163,7 @@ implementation{
                     serverSocket.state = SYN_RCVD;
                     serverSocket.dest.port = myMsg->srcPort;
                     serverSocket.dest.addr = package->src;
-                    serverSocket.effectiveWindow = 5;
+                    serverSocket.effectiveWindow = 20;
                     
                     call sockets.insert(fd, serverSocket);
 
@@ -262,12 +261,26 @@ implementation{
                         call sockets.insert(fd, serverSocket);
 
                     }
-                    else{
+                    else if(myMsg->data[0] == 'm'){
+                        TCPpack = (tcp_segment*)(sendPackage.payload);
+                        TCPpack->srcPort = 41;
+                        TCPpack->flags = PUSH;
+                        // char* sendData = malloc(strlen(myMsg->data)-1);
+                        for(i = 1; i< strlen(myMsg->data); i++){
+                            TCPpack->data[i-1] = myMsg->data[i];
+                        }
+                        TCPpack->data[i] = '\0';
+                        dbg(TRANSPORT_CHANNEL,"Broadcasting message to all connected clients\n");
+                        for(i = 0; i < call acceptList.size(); i++){
+                            connectedSocket = call acceptList.get(i);
 
+                            dbg(TRANSPORT_CHANNEL, "Message Sent to Node %d\n", connectedSocket);
+                            makePack(&sendPackage, TOS_NODE_ID, connectedSocket, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+                            call RSender.send(sendPackage, connectedSocket);
+                        }
                     }
                 }
                 else{
-
                     for(i = 0; i < serverSocket.effectiveWindow; i++){
                     serverSocket.rcvdBuff[i] = myMsg->data[i];
                     serverSocket.lastRcvd = myMsg->data[i];
@@ -297,6 +310,11 @@ implementation{
                 call sockets.insert(fd, clientSocket);
 
             }
+        }
+        else if(myMsg->flags == PUSH){
+            dbg(TRANSPORT_CHANNEL, "Node %d recieved message from server port 41\n", TOS_NODE_ID);
+            dbg(TRANSPORT_CHANNEL, "Reanding message: %s\n", myMsg->data);
+
         }
         else{
             //TERMINATION CLOSING CONNECTION
@@ -511,7 +529,23 @@ implementation{
         if(call sockets.contains(fd)){
 
             // dbg(TRANSPORT_CHANNEL, "clientSocket.lastAck: %d clientSocket.lastSent %d \n", clientSocket.lastAck, clientSocket.lastSent);
-            if(clientSocket.sendBuff[0] == 1){
+            if(clientSocket.sendBuff[0]== 'h' || clientSocket.sendBuff[0]== 'm' || clientSocket.sendBuff[0]== 'w'){
+                TCPpack->seq++;
+                TCPpack->flags = DATA;
+
+                for(i = 0; i < clientSocket.effectiveWindow; i++){
+                    TCPpack->data[i] = clientSocket.sendBuff[i];
+                    clientSocket.lastSent = TCPpack->data[i];
+                    // dbg(TRANSPORT_CHANNEL, "TCP data payload is %d \n", TCPpack->data[i]);
+                }
+                
+                call sockets.insert(fd, clientSocket);
+
+                makePack(&sendPackage, TOS_NODE_ID, clientSocket.dest.addr, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+                call RSender.send(sendPackage, clientSocket.dest.addr);
+                return SUCCESS;
+            }
+            else if(clientSocket.sendBuff[0] == 1){
                 TCPpack->seq = 0;
                 TCPpack->ACK = 1;
                 TCPpack->flags = DATA;
@@ -572,7 +606,7 @@ implementation{
         TCPpack->srcPort = serverSocket.src.port;
 
         if(serverSocket.state == ESTABLISHED){
-            TCPpack->advWindow = 5;
+            TCPpack->advWindow = 20;
             TCPpack->flags = DATA_ACK;
             TCPpack->ACK = serverSocket.lastRcvd;
 

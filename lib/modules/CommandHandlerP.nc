@@ -90,7 +90,7 @@ implementation{
 
             case CMD_MSG:
                 dbg(COMMAND_CHANNEL, "Command Type: Msg\n");
-                signal CommandHandler.msg(&buff[0]);
+                signal CommandHandler.Msg(&buff[0]);
                 break;
             
             case CMD_WHISPER:

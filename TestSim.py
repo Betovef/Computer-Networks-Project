@@ -150,7 +150,7 @@ class TestSim:
     def hello(self, src, username, clientport):
         self.sendCMD(self.CMD_HELLO, src, "{0}{1}".format(chr(clientport), username));
 
-    def msg(self, src, msg):
+    def Msg(self, src, msg):
         self.sendCMD(self.CMD_MSG, src, "{0}".format(msg));
     
     def whisper(self, src, username, msg):

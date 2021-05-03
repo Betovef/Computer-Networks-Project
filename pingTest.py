@@ -37,10 +37,10 @@ def main():
     s.runTime(100);
     s.hello(3, "John", 4);
     s.runTime(100);
-    # s.testClient(5, 1,   5, 10 , 30);
-    # s.runTime(300);
-    # s.ClientClosed(5, 1, 10, 5);
-    # s.runTime(200);
+    s.Msg(2, "Hello World!");
+    s.runTime(300);
+    s.whisper(4, "Bob\0", "Hi!\r\n")
+    s.runTime(200);
  
 
 if __name__ == '__main__':
