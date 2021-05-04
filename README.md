@@ -2,6 +2,11 @@
 This skeleton code is the basis for the CSE160 network project. Additional documentation
 on what is expected will be provided as the school year continues.
 
+Project 1: Flooding and Neighbor Discovery
+Project 2: Distance Vector Routing
+Project 3: Reliable Transport (TCP)
+Project 4: Chat Cient and Server
+
 # General Information
 ## Data Structures
 There are two data structures included into the project design to help with the
