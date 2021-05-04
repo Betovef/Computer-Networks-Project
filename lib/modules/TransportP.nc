@@ -262,12 +262,8 @@ implementation{
                         call sockets.insert(fd, serverSocket);
 
                     }
-                    else if(myMsg->data[0] == 'l'){ //if l appended to beginning it is a list command
-                            for(i = 0; i < call usersTable.size(); i++){
-                                //dbg(TRANSPORT_CHANNEL, "listUsrRply ");
-                              dbg(TRANSPORT_CHANNEL, "%d, " , call usersTable.get(i));  
-                            }
-                        }
+                    else {
+                    }
                     
                 }
                 else{
