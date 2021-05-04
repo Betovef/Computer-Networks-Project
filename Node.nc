@@ -257,12 +257,13 @@ implementation{
    }
 
    char* dataGlobal;
+   size_t lenGlobal;
 
    event void timeWait.fired(){
 
       if(call RoutingTable.contains(1))
       {
-         // dbg(TRANSPORT_CHANNEL, "dataGlobal: %s \n", dataGlobal);
+         dbg(TRANSPORT_CHANNEL, "dataGlobal: %s \n", dataGlobal);
          call Transport.write(fd, dataGlobal, strlen(dataGlobal));
          call Transport.sendBuffer(fd);
       }
@@ -272,6 +273,8 @@ implementation{
       uint16_t i = 0;
       size_t len = strlen(username);
       char* user = malloc(len+1);
+
+      lenGlobal = len;
 
       user[i] = 'h';
       for(i = 1; i < len+1; i++){
@@ -324,11 +327,35 @@ implementation{
 
    }
    event void CommandHandler.whisper(char *username, char* msg){
-      dbg(TRANSPORT_CHANNEL, "Say %s to %s\n", msg, username);
+      // dbg(TRANSPORT_CHANNEL, "Say %s to %s\n", msg, username);
+
+      uint16_t i = 0;
+      size_t len2 = strlen(msg);
+      size_t len1 = strlen(username);
+      size_t len = len1+len2;
+      char* whisperData = malloc(len1+len2+2);
+
+      whisperData[i] = 'w';
+      for(i = 1; i < len1+1; i++){
+         whisperData[i] = username[i-1];
+      }
+      for(i = len1+1; i<len+1; i++){
+         whisperData[i] = msg[i-1];
+      }
+      whisperData[i] = '\0';
+      dataGlobal = whisperData;
+      // dataGlobal[i] = '\0';
+
+      // dbg(TRANSPORT_CHANNEL, "Sending %s\n", newData);
+      call timeWait.startOneShotAt(call timeWait.getNow(), 0);
 
    }
    event void CommandHandler.listusr(){
-
+      char* lCommand = malloc(1);
+      lCommand[0] = 'l';
+      lCommand[1] = '\0';
+      dataGlobal = lCommand;
+      call timeWait.startOneShotAt(call timeWait.getNow(), 0);
    }
 
    event void CommandHandler.setAppServer(){}

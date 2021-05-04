@@ -279,6 +279,58 @@ implementation{
                             call RSender.send(sendPackage, connectedSocket);
                         }
                     }
+                    else if(myMsg->data[0] == 'w'){
+                        char* user;
+                        uint16_t j;
+                        bool check = TRUE;
+                        dbg(TRANSPORT_CHANNEL, "Trying to send %s\n", myMsg->data);
+                        for(i = 0; i < call acceptList.size(); i++){
+                            connectedSocket = call acceptList.get(i);
+                            temp = call usersTable.get(connectedSocket);
+                            for(j = 0; i< strlen(temp); j++){
+                                if(myMsg->data[j+1] != temp[j]){
+                                    check = FALSE;
+                                    break;
+                                }
+                            if(check == TRUE){
+                                TCPpack = (tcp_segment*)(sendPackage.payload);
+                                TCPpack->srcPort = 41;
+                                TCPpack->flags = PUSH;
+
+                                for(j = strlen(temp)+1; j < strlen(myMsg->data); j++){
+                                    // dbg(TRANSPORT_CHANNEL, "Printing %c at index %d\n", myMsg->data[j], j);
+                                    TCPpack->data[0] = myMsg->data[j];
+                                }
+                                TCPpack->data[j] = '\0';
+
+                                dbg(TRANSPORT_CHANNEL, "Message %s Sent to Node %d\n",TCPpack->data, connectedSocket);
+                                makePack(&sendPackage, TOS_NODE_ID, connectedSocket, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+                                call RSender.send(sendPackage, connectedSocket);
+                            }
+                            check == TRUE;
+                            }
+                        }
+                        // TCPpack = (tcp_segment*)(sendPackage.payload);
+                        // TCPpack->srcPort = 41;
+                        // TCPpack->flags = PUSH;
+
+                        // for(i = 1; i< strlen(myMsg->data); i++){
+                        //     TCPpack->data[i-1] = myMsg->data[i];
+                        // }
+                        // TCPpack->data[i] = '\0';
+
+                        // dbg(TRANSPORT_CHANNEL, "Message Sent to Node %d\n", );
+                        // makePack(&sendPackage, TOS_NODE_ID, connectedSocket, 20, PROTOCOL_TCP, 0, TCPpack, PACKET_MAX_PAYLOAD_SIZE);
+                        // call RSender.send(sendPackage, connectedSocket);
+                    }
+                    else{
+                        for(i = 0; i < call acceptList.size(); i++){
+                            connectedSocket = call acceptList.get(i);
+                            temp = call usersTable.get(connectedSocket);
+
+                            dbg(TRANSPORT_CHANNEL, "Users List: %s\n", temp);
+                        }
+                    }
                 }
                 else{
                     for(i = 0; i < serverSocket.effectiveWindow; i++){
@@ -313,7 +365,7 @@ implementation{
         }
         else if(myMsg->flags == PUSH){
             dbg(TRANSPORT_CHANNEL, "Node %d recieved message from server port 41\n", TOS_NODE_ID);
-            dbg(TRANSPORT_CHANNEL, "Reanding message: %s\n", myMsg->data);
+            dbg(TRANSPORT_CHANNEL, "Reading message: %s\n", myMsg->data);
 
         }
         else{

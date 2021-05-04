@@ -35,12 +35,16 @@ def main():
     s.runTime(100);
     s.hello(2, "Andi", 5);
     s.runTime(100);
+    # s.hello(4, "Ale", 5);
+    # s.runTime(100);
     s.hello(3, "John", 4);
     s.runTime(100);
-    s.Msg(2, "Hello World!");
+    # s.listur(2);
+    #s.Msg(2, "Hello World!"); 
+    #s.runTime(300);
+    #s.listur(2);
+    s.whisper(2, "Bob", "Hi!")
     s.runTime(300);
-    s.whisper(4, "Bob\0", "Hi!\r\n")
-    s.runTime(200);
  
 
 if __name__ == '__main__':
