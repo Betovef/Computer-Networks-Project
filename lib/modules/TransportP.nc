@@ -331,6 +331,7 @@ implementation{
                             dbg(TRANSPORT_CHANNEL, "Users List: %s\n", temp);
                         }
                     }
+                    
                 }
                 else{
                     for(i = 0; i < serverSocket.effectiveWindow; i++){
@@ -526,7 +527,7 @@ implementation{
 
     command error_t Transport.release(socket_t fd)
     {
-
+        
     }
 
     command error_t Transport.listen(socket_t fd)
